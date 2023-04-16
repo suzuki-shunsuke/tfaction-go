@@ -77,9 +77,10 @@ type IssueClient interface {
 }
 
 type Issue struct {
-	Number int    `json:"number"`
-	Title  string `json:"title"`
-	Target string `json:"target"`
+	Number int    `json:"number,omitempty"`
+	Title  string `json:"title,omitempty"`
+	Target string `json:"target,omitempty"`
+	State  string `json:"state,omitempty"`
 }
 
 var titlePattern = regexp.MustCompile(`^Terraform Drift \((\S+)\)$`)
@@ -155,6 +156,7 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 				Issue struct {
 					Number githubv4.Int
 					Title  githubv4.String
+					State  githubv4.String
 				} `graphql:"... on Issue"`
 			}
 			PageInfo struct {
@@ -184,6 +186,7 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 				Number: int(issue.Issue.Number),
 				Title:  title,
 				Target: a[1],
+				State:  string(issue.Issue.State),
 			})
 			if len(allIssues) == numOfIssues {
 				break
