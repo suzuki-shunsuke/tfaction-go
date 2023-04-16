@@ -1,4 +1,4 @@
-package cli //nolint:dupl
+package cli
 
 import (
 	"errors"
@@ -36,8 +36,13 @@ func (runner *Runner) getOrCreateDriftIssueAction(c *cli.Context) error {
 	if !found {
 		return errors.New("GITHUB_REPOSITORY is invalid")
 	}
+	target := os.Getenv("TFACTION_TARGET")
+	if target == "" {
+		return errors.New("TFACTION_TARGET is not set")
+	}
 	return ctrl.Run(c.Context, runner.LogE, &issue.Param{ //nolint:wrapcheck
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
+		Target:    target,
 	})
 }
