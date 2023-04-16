@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/google/go-github/v51/github"
 	"github.com/shurcooL/githubv4"
@@ -187,7 +188,7 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 				Number: int(issue.Issue.Number),
 				Title:  title,
 				Target: a[1],
-				State:  string(issue.Issue.State),
+				State:  strings.ToLower(string(issue.Issue.State)),
 			})
 			if len(allIssues) == numOfIssues {
 				break
@@ -235,7 +236,7 @@ func (cl *ClientImpl) GetIssue(ctx context.Context, repoOwner, repoName, title s
 			}
 			return &Issue{
 				Number: int(issue.Issue.Number),
-				State:  string(issue.Issue.State),
+				State:  strings.ToLower(string(issue.Issue.State)),
 			}, nil
 		}
 		if !q.Search.PageInfo.HasNextPage {
