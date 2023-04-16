@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-github/v51/github"
 	"github.com/shurcooL/githubv4"
+	"github.com/suzuki-shunsuke/tfaction-go/pkg/util"
 	"golang.org/x/oauth2"
 )
 
@@ -60,7 +61,9 @@ func getHTTPClientForGitHub(ctx context.Context, token string) *http.Client {
 
 type Client interface {
 	ListIssues(ctx context.Context, repoOwner, repoName string) ([]*Issue, error)
+	ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOwner, repoName string, numOfIssues int, deadline string) ([]*Issue, error)
 	CreateIssue(ctx context.Context, repoOwner, repoName string, param *IssueRequest) (*GitHubIssue, error)
+	CloseIssue(ctx context.Context, repoOwner, repoName string, issueNumber int) (*GitHubIssue, error)
 }
 
 type ClientImpl struct {
@@ -70,12 +73,13 @@ type ClientImpl struct {
 
 type IssueClient interface {
 	Create(ctx context.Context, owner string, repo string, issue *IssueRequest) (*GitHubIssue, *Response, error)
+	Edit(ctx context.Context, owner string, repo string, issueNumber int, issue *IssueRequest) (*GitHubIssue, *Response, error)
 }
 
 type Issue struct {
-	Number int
-	Title  string
-	Target string
+	Number int    `json:"number"`
+	Title  string `json:"title"`
+	Target string `json:"target"`
 }
 
 var titlePattern = regexp.MustCompile(`^Terraform Drift \((\S+)\)$`)
@@ -132,4 +136,63 @@ func (cl *ClientImpl) CreateIssue(ctx context.Context, repoOwner, repoName strin
 		return nil, fmt.Errorf("create an issue by GitHub API v3: %w", err)
 	}
 	return ret, nil
+}
+
+func (cl *ClientImpl) CloseIssue(ctx context.Context, repoOwner, repoName string, issueNumber int) (*GitHubIssue, error) {
+	ret, _, err := cl.issue.Edit(ctx, repoOwner, repoName, issueNumber, &IssueRequest{
+		State: util.StrP("closed"),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("create an issue by GitHub API v3: %w", err)
+	}
+	return ret, nil
+}
+
+func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOwner, repoName string, numOfIssues int, deadline string) ([]*Issue, error) {
+	var q struct {
+		Search struct {
+			Nodes []struct {
+				Issue struct {
+					Number githubv4.Int
+					Title  githubv4.String
+				} `graphql:"... on Issue"`
+			}
+			PageInfo struct {
+				EndCursor   githubv4.String
+				HasNextPage bool
+			}
+		} `graphql:"search(first: 100, after: $issuesCursor, query: $searchQuery, type: $searchType)"`
+	}
+	variables := map[string]interface{}{
+		"searchQuery":  githubv4.String(fmt.Sprintf(`repo:%s/%s "Terraform Drift" in:title sort:updated-asc updated:<%s`, repoOwner, repoName, deadline)),
+		"searchType":   githubv4.SearchTypeIssue,
+		"issuesCursor": (*githubv4.String)(nil), // Null after argument to get first page.
+	}
+
+	var allIssues []*Issue
+	for {
+		if err := cl.v4Client.Query(ctx, &q, variables); err != nil {
+			return nil, fmt.Errorf("list issue comments by GitHub API: %w", err)
+		}
+		for _, issue := range q.Search.Nodes {
+			title := string(issue.Issue.Title)
+			a := titlePattern.FindStringSubmatch(title)
+			if a == nil {
+				continue
+			}
+			allIssues = append(allIssues, &Issue{
+				Number: int(issue.Issue.Number),
+				Title:  title,
+				Target: a[1],
+			})
+			if len(allIssues) == numOfIssues {
+				break
+			}
+		}
+		if !q.Search.PageInfo.HasNextPage {
+			break
+		}
+		variables["issuesCursor"] = githubv4.NewString(q.Search.PageInfo.EndCursor)
+	}
+	return allIssues, nil
 }

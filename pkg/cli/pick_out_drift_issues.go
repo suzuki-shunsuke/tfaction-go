@@ -7,21 +7,21 @@ import (
 	"strings"
 
 	"github.com/spf13/afero"
-	issues "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/create-drift-issues"
+	issues "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/pick-out-drift-issues"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/log"
 	"github.com/urfave/cli/v2"
 )
 
-func (runner *Runner) newCreateDriftIssuesCommand() *cli.Command {
+func (runner *Runner) newPickOutDriftIssuesCommand() *cli.Command {
 	return &cli.Command{
-		Name:   "create-drift-issues",
-		Usage:  "Create GitHub Issues for Terraform drift detection",
-		Action: runner.createDriftIssuesAction,
+		Name:   "pick-out-drift-issues",
+		Usage:  "Pick out GitHub Issues for Terraform drift detection",
+		Action: runner.pickOutDriftIssuesAction,
 	}
 }
 
-func (runner *Runner) createDriftIssuesAction(c *cli.Context) error {
+func (runner *Runner) pickOutDriftIssuesAction(c *cli.Context) error {
 	gh, err := github.New(c.Context, &github.ParamNew{
 		Token: os.Getenv("GITHUB_TOKEN"),
 	})
@@ -36,13 +36,8 @@ func (runner *Runner) createDriftIssuesAction(c *cli.Context) error {
 	if !found {
 		return errors.New("GITHUB_REPOSITORY is invalid")
 	}
-	pwd, err := os.Getwd()
-	if err != nil {
-		return fmt.Errorf("get a current directory path: %w", err)
-	}
 	return ctrl.Run(c.Context, runner.LogE, &issues.Param{ //nolint:wrapcheck
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
-		PWD:       pwd,
 	})
 }
