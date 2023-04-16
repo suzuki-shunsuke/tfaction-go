@@ -45,6 +45,7 @@ func (runner *Runner) Run(ctx context.Context, args ...string) error {
 			runner.newVersionCommand(),
 			runner.newCreateDriftIssuesCommand(),
 			runner.newPickOutDriftIssuesCommand(),
+			runner.newGetOrCreateDriftIssueCommand(),
 		},
 	}
 

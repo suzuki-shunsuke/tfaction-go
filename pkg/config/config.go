@@ -46,8 +46,10 @@ type Config struct {
 }
 
 type DriftDetection struct {
-	NumOfIssues int
-	Duration    int
+	NumOfIssues    int `yaml:"num_of_issues"`
+	Duration       int
+	IssueRepoOwner string `yaml:"issue_repo_owner"`
+	IssueRepoName  string `yaml:"issue_repo_name"`
 }
 
 type TargetGroup struct {

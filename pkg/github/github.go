@@ -64,6 +64,7 @@ type Client interface {
 	ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOwner, repoName string, numOfIssues int, deadline string) ([]*Issue, error)
 	CreateIssue(ctx context.Context, repoOwner, repoName string, param *IssueRequest) (*GitHubIssue, error)
 	CloseIssue(ctx context.Context, repoOwner, repoName string, issueNumber int) (*GitHubIssue, error)
+	GetIssue(ctx context.Context, repoOwner, repoName, title string) (*Issue, error)
 }
 
 type ClientImpl struct {
@@ -198,4 +199,49 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 		variables["issuesCursor"] = githubv4.NewString(q.Search.PageInfo.EndCursor)
 	}
 	return allIssues, nil
+}
+
+func (cl *ClientImpl) GetIssue(ctx context.Context, repoOwner, repoName, title string) (*Issue, error) {
+	var q struct {
+		Search struct {
+			Nodes []struct {
+				Issue struct {
+					Number githubv4.Int
+					Title  githubv4.String
+					State  githubv4.String
+				} `graphql:"... on Issue"`
+			}
+			PageInfo struct {
+				EndCursor   githubv4.String
+				HasNextPage bool
+			}
+		} `graphql:"search(first: 100, after: $issuesCursor, query: $searchQuery, type: $searchType)"`
+	}
+	variables := map[string]interface{}{
+		"searchQuery":  githubv4.String(fmt.Sprintf(`repo:%s/%s "%s" in:title`, repoOwner, repoName, title)),
+		"searchType":   githubv4.SearchTypeIssue,
+		"issuesCursor": (*githubv4.String)(nil), // Null after argument to get first page.
+	}
+
+	for {
+		if err := cl.v4Client.Query(ctx, &q, variables); err != nil {
+			return nil, fmt.Errorf("list issue comments by GitHub API: %w", err)
+		}
+		for _, issue := range q.Search.Nodes {
+			title := string(issue.Issue.Title)
+			a := titlePattern.FindStringSubmatch(title)
+			if a == nil {
+				continue
+			}
+			return &Issue{
+				Number: int(issue.Issue.Number),
+				State:  string(issue.Issue.State),
+			}, nil
+		}
+		if !q.Search.PageInfo.HasNextPage {
+			break
+		}
+		variables["issuesCursor"] = githubv4.NewString(q.Search.PageInfo.EndCursor)
+	}
+	return nil, nil //nolint:nilnil
 }
