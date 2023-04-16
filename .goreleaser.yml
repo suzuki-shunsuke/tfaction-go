@@ -1,10 +1,10 @@
 ---
-project_name: pinact
+project_name: tfaction
 archives:
   - name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
 builds:
-  - binary: pinact
-    main: cmd/pinact/main.go
+  - binary: tfaction
+    main: cmd/tfaction/main.go
     env:
       - CGO_ENABLED=0
     goos:
@@ -17,7 +17,7 @@ builds:
 release:
   prerelease: true
   header: |
-    [Pull Requests](https://github.com/suzuki-shunsuke/pinact/pulls?q=is%3Apr+milestone%3A{{.Tag}}) | [Issues](https://github.com/suzuki-shunsuke/pinact/issues?q=is%3Aissue+milestone%3A{{.Tag}}) | https://github.com/suzuki-shunsuke/pinact/compare/{{.PreviousTag}}...{{.Tag}}
+    [Pull Requests](https://github.com/suzuki-shunsuke/tfaction/pulls?q=is%3Apr+milestone%3A{{.Tag}}) | [Issues](https://github.com/suzuki-shunsuke/tfaction/issues?q=is%3Aissue+milestone%3A{{.Tag}}) | https://github.com/suzuki-shunsuke/tfaction/compare/{{.PreviousTag}}...{{.Tag}}
 signs:
   - cmd: cosign
     artifacts: checksum
@@ -43,17 +43,17 @@ brews:
     # GitHub/GitLab repository to push the formula to
     tap:
       owner: suzuki-shunsuke
-      name: homebrew-pinact
+      name: homebrew-tfaction
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     # The project name and current git tag are used in the format string.
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     # Your app's homepage.
     # Default is empty.
-    homepage: https://github.com/suzuki-shunsuke/pinact
+    homepage: https://github.com/suzuki-shunsuke/tfaction-go
 
     # Template of your app's description.
     # Default is empty.
-    description: Pin GitHub Actions versions
+    description: GitHub Actions for Terraform
     license: MIT
 
     # Setting this will prevent goreleaser to actually try to commit the updated
@@ -67,4 +67,4 @@ brews:
     # So you can `brew test` your formula.
     # Default is empty.
     test: |
-      system "#{bin}/pinact --version"
+      system "#{bin}/tfaction --version"
