@@ -36,6 +36,8 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		return fmt.Errorf("read tfaction-root.yaml: %w", err)
 	}
 	if cfg.DriftDetection == nil {
+		githubactions.SetOutput("has_issues", "false")
+		githubactions.SetOutput("issues", "[]")
 		return nil
 	}
 
@@ -54,6 +56,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 
 	if len(issues) == 0 {
 		githubactions.SetOutput("has_issues", "false")
+		githubactions.SetOutput("issues", "[]")
 		return nil
 	}
 
