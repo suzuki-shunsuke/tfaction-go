@@ -229,9 +229,7 @@ func (cl *ClientImpl) GetIssue(ctx context.Context, repoOwner, repoName, title s
 			return nil, fmt.Errorf("list issue comments by GitHub API: %w", err)
 		}
 		for _, issue := range q.Search.Nodes {
-			title := string(issue.Issue.Title)
-			a := titlePattern.FindStringSubmatch(title)
-			if a == nil {
+			if string(issue.Issue.Title) != title {
 				continue
 			}
 			return &Issue{
