@@ -66,6 +66,7 @@ type Client interface {
 	CreateIssue(ctx context.Context, repoOwner, repoName string, param *IssueRequest) (*GitHubIssue, error)
 	CloseIssue(ctx context.Context, repoOwner, repoName string, issueNumber int) (*GitHubIssue, error)
 	GetIssue(ctx context.Context, repoOwner, repoName, title string) (*Issue, error)
+	ArchiveIssue(ctx context.Context, repoOwner, repoName string, issueNumber int, title string) (*GitHubIssue, error)
 }
 
 type ClientImpl struct {
@@ -146,7 +147,18 @@ func (cl *ClientImpl) CloseIssue(ctx context.Context, repoOwner, repoName string
 		State: util.StrP("closed"),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("create an issue by GitHub API v3: %w", err)
+		return nil, fmt.Errorf("close an issue by GitHub API v3: %w", err)
+	}
+	return ret, nil
+}
+
+func (cl *ClientImpl) ArchiveIssue(ctx context.Context, repoOwner, repoName string, issueNumber int, title string) (*GitHubIssue, error) {
+	ret, _, err := cl.issue.Edit(ctx, repoOwner, repoName, issueNumber, &IssueRequest{
+		State: util.StrP("closed"),
+		Title: util.StrP(title),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("edit an issue by GitHub API v3: %w", err)
 	}
 	return ret, nil
 }

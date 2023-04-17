@@ -33,14 +33,10 @@ type Param struct {
 	PWD       string
 }
 
-func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:cyclop,funlen
-	cfg, err := config.Read(ctrl.fs)
-	if err != nil {
-		return fmt.Errorf("read tfaction-root.yaml: %w", err)
-	}
+func ListWorkingDirectoryPaths(cfg *config.Config, pwd string) ([]string, error) {
 	workingDirectoryFileName := cfg.GetWorkingDirectoryFile()
 	workingDirectoryPaths := []string{}
-	baseWorkingDirectory := filepath.Join(param.PWD, cfg.BaseWorkingDirectory)
+	baseWorkingDirectory := filepath.Join(pwd, cfg.BaseWorkingDirectory)
 	if err := filepath.WalkDir(baseWorkingDirectory, func(p string, dirEntry fs.DirEntry, e error) error {
 		if dirEntry.Name() != workingDirectoryFileName {
 			return nil
@@ -52,36 +48,67 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		workingDirectoryPaths = append(workingDirectoryPaths, f)
 		return nil
 	}); err != nil {
-		return fmt.Errorf("search working directories: %w", err)
+		return nil, fmt.Errorf("search working directories: %w", err)
 	}
-	logE.WithField("num_of_working_dirs", len(workingDirectoryPaths)).Debug("search working directories")
-	// Convert working directory to target
-	targets := make([]string, 0, len(workingDirectoryPaths))
+	return workingDirectoryPaths, nil
+}
+
+func ListTargets(targetGroups []*config.TargetGroup, workingDirectoryPaths []string) map[string]struct{} {
+	targets := make(map[string]struct{}, len(workingDirectoryPaths))
 	for _, workingDirectoryPath := range workingDirectoryPaths {
-		for _, targetGroup := range cfg.TargetGroups {
+		for _, targetGroup := range targetGroups {
 			if strings.HasPrefix(workingDirectoryPath, targetGroup.WorkingDirectory) {
-				targets = append(targets, strings.Replace(workingDirectoryPath, targetGroup.WorkingDirectory, targetGroup.Target, 1))
+				targets[strings.Replace(workingDirectoryPath, targetGroup.WorkingDirectory, targetGroup.Target, 1)] = struct{}{}
 				break
 			}
 		}
 	}
+	return targets
+}
+
+func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:cyclop,funlen
+	cfg, err := config.Read(ctrl.fs)
+	if err != nil {
+		return fmt.Errorf("read tfaction-root.yaml: %w", err)
+	}
+
+	repoOwner := param.RepoOwner
+	repoName := param.RepoName
+	if cfg.DriftDetection != nil {
+		if cfg.DriftDetection.IssueRepoOwner != "" {
+			repoOwner = cfg.DriftDetection.IssueRepoOwner
+		}
+		if cfg.DriftDetection.IssueRepoName != "" {
+			repoName = cfg.DriftDetection.IssueRepoName
+		}
+	}
+
+	workingDirectoryPaths, err := ListWorkingDirectoryPaths(cfg, param.PWD)
+	if err != nil {
+		return err
+	}
+
+	logE.WithField("num_of_working_dirs", len(workingDirectoryPaths)).Debug("search working directories")
+	targets := ListTargets(cfg.TargetGroups, workingDirectoryPaths)
 	logE.WithField("num_of_targets", len(targets)).Debug("convert working directories to targets")
 	// Search GitHub Issues
-	issues, err := ctrl.gh.ListIssues(ctx, param.RepoOwner, param.RepoName)
+	issues, err := ctrl.gh.ListIssues(ctx, repoOwner, repoName)
 	if err != nil {
 		return fmt.Errorf("list issues: %w", err)
 	}
 	logE.WithField("num_of_issues", len(issues)).Debug("search GiHub issues")
 	issueTargets := make(map[string]struct{}, len(issues))
+	issueMap := make(map[string]*github.Issue, len(issues))
 	for _, issue := range issues {
 		issueTargets[issue.Target] = struct{}{}
+		issueMap[issue.Target] = issue
 	}
-	for _, target := range targets {
+	for target := range targets {
 		logE := logE.WithField("target", target)
 		if _, ok := issueTargets[target]; ok {
 			continue
 		}
-		issue, err := ctrl.gh.CreateIssue(ctx, param.RepoOwner, param.RepoName, &github.IssueRequest{
+		issue, err := ctrl.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
 			Title: util.StrP(fmt.Sprintf(`Terraform Drift (%s)`, target)),
 			Body: util.StrP(`
 This issus was created by [tfaction](https://suzuki-shunsuke.github.io/tfaction/docs/).
@@ -95,10 +122,27 @@ tfaction searches Issues by Issue title. So please don't change the issue title.
 			logerr.WithError(logE, err).Error("create an issue")
 		}
 		logE.Info("created an issue")
-		if _, err := ctrl.gh.CloseIssue(ctx, param.RepoOwner, param.RepoName, issue.GetNumber()); err != nil {
+		if _, err := ctrl.gh.CloseIssue(ctx, repoOwner, repoName, issue.GetNumber()); err != nil {
 			logerr.WithError(logE, err).Error("close an issue")
 		}
 		logE.Debug("closed an issue")
+		issueMap[target] = &github.Issue{
+			Number: issue.GetNumber(),
+			Title:  issue.GetTitle(),
+		}
+	}
+	for target, issue := range issueMap {
+		// Rename issues whose targets are not found
+		if _, ok := targets[target]; ok {
+			continue
+		}
+		logE := logE.WithFields(logrus.Fields{
+			"target":       target,
+			"issue_number": issue.Number,
+		})
+		if _, err := ctrl.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, fmt.Sprintf(`Archived %s`, issue.Title)); err != nil {
+			logE.WithError(err).Error("archive an issue")
+		}
 	}
 	return nil
 }

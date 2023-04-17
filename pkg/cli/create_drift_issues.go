@@ -1,4 +1,4 @@
-package cli
+package cli //nolint:dupl
 
 import (
 	"errors"
