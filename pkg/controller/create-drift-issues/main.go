@@ -143,6 +143,7 @@ tfaction searches Issues by Issue title. So please don't change the issue title.
 		if _, err := ctrl.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, fmt.Sprintf(`Archived %s`, issue.Title)); err != nil {
 			logE.WithError(err).Error("archive an issue")
 		}
+		logE.Info("archive an issue")
 	}
 	return nil
 }

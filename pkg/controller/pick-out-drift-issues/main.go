@@ -79,9 +79,14 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 			arr = append(arr, issue)
 			continue
 		}
+		logE := logE.WithFields(logrus.Fields{
+			"issue_number": issue.Number,
+			"target":       issue.Target,
+		})
 		if _, err := ctrl.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, fmt.Sprintf(`Archived %s`, issue.Title)); err != nil {
 			logE.WithError(err).Error("archive an issue")
 		}
+		logE.Info("archive an issue")
 	}
 
 	if len(arr) == 0 {
