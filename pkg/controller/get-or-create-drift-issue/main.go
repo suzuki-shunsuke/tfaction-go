@@ -75,11 +75,17 @@ tfaction searches Issues by Issue title. So please don't change the issue title.
 		githubactions.SetOutput("issue_number", strconv.Itoa(issue.GetNumber()))
 		githubactions.SetOutput("issue_state", "open")
 
+		githubactions.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.GetNumber()))
+		githubactions.SetEnv("TFACTION_DRIFT_ISSUE_STATE", "open")
+
 		return nil
 	}
 
 	githubactions.SetOutput("issue_number", strconv.Itoa(issue.Number))
 	githubactions.SetOutput("issue_state", issue.State)
+
+	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.Number))
+	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_STATE", issue.State)
 
 	return nil
 }
