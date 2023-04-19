@@ -41,8 +41,9 @@ func (runner *Runner) getOrCreateDriftIssueAction(c *cli.Context) error {
 		return errors.New("TFACTION_TARGET is not set")
 	}
 	return ctrl.Run(c.Context, runner.LogE, &issue.Param{ //nolint:wrapcheck
-		RepoOwner: repoOwner,
-		RepoName:  repoName,
-		Target:    target,
+		RepoOwner:       repoOwner,
+		RepoName:        repoName,
+		Target:          target,
+		GitHubServerURL: os.Getenv("GITHUB_SERVER_URL"),
 	})
 }

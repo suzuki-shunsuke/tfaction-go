@@ -27,9 +27,10 @@ func New(gh github.Client, fs afero.Fs) *Controller {
 }
 
 type Param struct {
-	RepoOwner string
-	RepoName  string
-	Target    string
+	RepoOwner       string
+	RepoName        string
+	Target          string
+	GitHubServerURL string
 }
 
 func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error {
@@ -56,29 +57,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		return fmt.Errorf("get a drift issue: %w", err)
 	}
 	if issue == nil {
-		// Create a drift issue
-		issue, err := ctrl.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
-			Title: util.StrP(fmt.Sprintf(`Terraform Drift (%s)`, param.Target)),
-			Body: util.StrP(`
-This issus was created by [tfaction](https://suzuki-shunsuke.github.io/tfaction/docs/).
-
-## :warning: Don't change the issue title
-
-tfaction searches Issues by Issue title. So please don't change the issue title.
-`),
-		})
-		if err != nil {
-			logerr.WithError(logE, err).Error("create an issue")
-		}
-		logE.Info("created an issue")
-
-		githubactions.SetOutput("issue_number", strconv.Itoa(issue.GetNumber()))
-		githubactions.SetOutput("issue_state", "open")
-
-		githubactions.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.GetNumber()))
-		githubactions.SetEnv("TFACTION_DRIFT_ISSUE_STATE", "open")
-
-		return nil
+		return ctrl.createIssue(ctx, logE, repoOwner, repoName, param)
 	}
 
 	githubactions.SetOutput("issue_number", strconv.Itoa(issue.Number))
@@ -86,6 +65,40 @@ tfaction searches Issues by Issue title. So please don't change the issue title.
 
 	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.Number))
 	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_STATE", issue.State)
+
+	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.Number)
+	githubactions.Infof(issueURL)
+	githubactions.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
+
+	return nil
+}
+
+func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, repoOwner, repoName string, param *Param) error {
+	// Create a drift issue
+	issue, err := ctrl.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
+		Title: util.StrP(fmt.Sprintf(`Terraform Drift (%s)`, param.Target)),
+		Body: util.StrP(`
+This issus was created by [tfaction](https://suzuki-shunsuke.github.io/tfaction/docs/).
+
+## :warning: Don't change the issue title
+
+tfaction searches Issues by Issue title. So please don't change the issue title.
+`),
+	})
+	if err != nil {
+		logerr.WithError(logE, err).Error("create an issue")
+	}
+	logE.Info("created an issue")
+
+	githubactions.SetOutput("issue_number", strconv.Itoa(issue.GetNumber()))
+	githubactions.SetOutput("issue_state", "open")
+
+	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.GetNumber()))
+	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_STATE", "open")
+
+	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.Number)
+	githubactions.Infof(issueURL)
+	githubactions.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
 
 	return nil
 }
