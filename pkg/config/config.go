@@ -35,6 +35,9 @@ func (cr *configRaw) Config() *Config {
 			cfg.DriftDetection.Duration = 168
 		}
 	}
+	if cfg.WorkingDirectoryFile == "" {
+		cfg.WorkingDirectoryFile = "tfaction.yaml"
+	}
 	return cfg
 }
 
@@ -55,13 +58,6 @@ type DriftDetection struct {
 type TargetGroup struct {
 	WorkingDirectory string `yaml:"working_directory"`
 	Target           string
-}
-
-func (cfg *Config) GetWorkingDirectoryFile() string {
-	if cfg.WorkingDirectoryFile != "" {
-		return cfg.WorkingDirectoryFile
-	}
-	return "tfaction.yaml"
 }
 
 func Read(fs afero.Fs) (*Config, error) {

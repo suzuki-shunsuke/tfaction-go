@@ -34,11 +34,10 @@ type Param struct {
 }
 
 func ListWorkingDirectoryPaths(cfg *config.Config, pwd string) ([]string, error) {
-	workingDirectoryFileName := cfg.GetWorkingDirectoryFile()
 	workingDirectoryPaths := []string{}
 	baseWorkingDirectory := filepath.Join(pwd, cfg.BaseWorkingDirectory)
 	if err := filepath.WalkDir(baseWorkingDirectory, func(p string, dirEntry fs.DirEntry, e error) error {
-		if dirEntry.Name() != workingDirectoryFileName {
+		if dirEntry.Name() != cfg.WorkingDirectoryFile {
 			return nil
 		}
 		f, err := filepath.Rel(baseWorkingDirectory, filepath.Dir(p))

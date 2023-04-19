@@ -27,6 +27,11 @@ type ParamNew struct {
 	GHEGraphQLEndpoint string
 }
 
+type ClientImpl struct {
+	v4Client v4Client
+	issue    IssueClient
+}
+
 func New(ctx context.Context, param *ParamNew) (*ClientImpl, error) {
 	httpClient := getHTTPClientForGitHub(ctx, param.Token)
 	client := &ClientImpl{}
@@ -51,6 +56,10 @@ func New(ctx context.Context, param *ParamNew) (*ClientImpl, error) {
 	return client, nil
 }
 
+type v4Client interface {
+	Query(ctx context.Context, q interface{}, variables map[string]interface{}) error
+}
+
 func getHTTPClientForGitHub(ctx context.Context, token string) *http.Client {
 	if token == "" {
 		return http.DefaultClient
@@ -67,11 +76,6 @@ type Client interface {
 	CloseIssue(ctx context.Context, repoOwner, repoName string, issueNumber int) (*GitHubIssue, error)
 	GetIssue(ctx context.Context, repoOwner, repoName, title string) (*Issue, error)
 	ArchiveIssue(ctx context.Context, repoOwner, repoName string, issueNumber int, title string) (*GitHubIssue, error)
-}
-
-type ClientImpl struct {
-	v4Client *githubv4.Client
-	issue    IssueClient
 }
 
 type IssueClient interface {
