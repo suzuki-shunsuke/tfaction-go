@@ -3,6 +3,7 @@ module github.com/suzuki-shunsuke/tfaction-go
 go 1.20
 
 require (
+	github.com/google/go-cmp v0.5.9
 	github.com/google/go-github/v51 v51.0.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/sethvargo/go-githubactions v1.1.0
