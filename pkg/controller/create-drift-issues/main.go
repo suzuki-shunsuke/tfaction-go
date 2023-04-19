@@ -66,6 +66,12 @@ func ListTargets(targetGroups []*config.TargetGroup, workingDirectoryPaths []str
 	return targets
 }
 
+const IssueBodyTemplate = `
+This issus was created by [tfaction](https://suzuki-shunsuke.github.io/tfaction/docs/).
+
+About this issue, please see [the document](https://suzuki-shunsuke.github.io/tfaction/docs/feature/drift-detection).
+`
+
 func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:cyclop,funlen
 	cfg, err := config.Read(ctrl.fs)
 	if err != nil {
@@ -110,13 +116,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		}
 		issue, err := ctrl.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
 			Title: util.StrP(fmt.Sprintf(`Terraform Drift (%s)`, target)),
-			Body: util.StrP(`
-This issus was created by [tfaction](https://suzuki-shunsuke.github.io/tfaction/docs/).
-
-## :warning: Don't change the issue title
-
-tfaction searches Issues by Issue title. So please don't change the issue title.
-`),
+			Body:  util.StrP(IssueBodyTemplate),
 		})
 		if err != nil {
 			logerr.WithError(logE, err).Error("create an issue")

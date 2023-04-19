@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/config"
+	createdriftissues "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/create-drift-issues"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/util"
 )
@@ -77,13 +78,7 @@ func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, rep
 	// Create a drift issue
 	issue, err := ctrl.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
 		Title: util.StrP(fmt.Sprintf(`Terraform Drift (%s)`, param.Target)),
-		Body: util.StrP(`
-This issus was created by [tfaction](https://suzuki-shunsuke.github.io/tfaction/docs/).
-
-## :warning: Don't change the issue title
-
-tfaction searches Issues by Issue title. So please don't change the issue title.
-`),
+		Body:  util.StrP(createdriftissues.IssueBodyTemplate),
 	})
 	if err != nil {
 		logerr.WithError(logE, err).Error("create an issue")
