@@ -16,7 +16,7 @@ drift_detection:
 type configRaw struct {
 	BaseWorkingDirectory string          `yaml:"base_working_directory"`
 	WorkingDirectoryFile string          `yaml:"working_directory_file"`
-	TargetGroups         []TargetGroup   `yaml:"target_groups"`
+	TargetGroups         []*TargetGroup  `yaml:"target_groups"`
 	DriftDetection       *DriftDetection `yaml:"drift_detection"`
 }
 
@@ -41,13 +41,15 @@ func (cr *configRaw) Config() *Config {
 type Config struct {
 	BaseWorkingDirectory string
 	WorkingDirectoryFile string
-	TargetGroups         []TargetGroup
+	TargetGroups         []*TargetGroup
 	DriftDetection       *DriftDetection
 }
 
 type DriftDetection struct {
-	NumOfIssues int
-	Duration    int
+	NumOfIssues    int `yaml:"num_of_issues"`
+	Duration       int
+	IssueRepoOwner string `yaml:"issue_repo_owner"`
+	IssueRepoName  string `yaml:"issue_repo_name"`
 }
 
 type TargetGroup struct {

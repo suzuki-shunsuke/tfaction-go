@@ -1,4 +1,4 @@
-package cli
+package cli //nolint:dupl
 
 import (
 	"errors"
@@ -36,8 +36,13 @@ func (runner *Runner) pickOutDriftIssuesAction(c *cli.Context) error {
 	if !found {
 		return errors.New("GITHUB_REPOSITORY is invalid")
 	}
+	pwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("get a current directory path: %w", err)
+	}
 	return ctrl.Run(c.Context, runner.LogE, &issues.Param{ //nolint:wrapcheck
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
+		PWD:       pwd,
 	})
 }
