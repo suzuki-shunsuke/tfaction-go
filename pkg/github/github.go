@@ -207,15 +207,14 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 				State:  strings.ToLower(string(issue.Issue.State)),
 			})
 			if len(allIssues) == numOfIssues {
-				break
+				return allIssues, nil
 			}
 		}
 		if !q.Search.PageInfo.HasNextPage {
-			break
+			return allIssues, nil
 		}
 		variables["issuesCursor"] = githubv4.NewString(q.Search.PageInfo.EndCursor)
 	}
-	return allIssues, nil
 }
 
 func (cl *ClientImpl) GetIssue(ctx context.Context, repoOwner, repoName, title string) (*Issue, error) {
