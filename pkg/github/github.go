@@ -211,11 +211,10 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 			}
 		}
 		if !q.Search.PageInfo.HasNextPage {
-			break
+			return allIssues, nil
 		}
 		variables["issuesCursor"] = githubv4.NewString(q.Search.PageInfo.EndCursor)
 	}
-	return allIssues, nil
 }
 
 func (cl *ClientImpl) GetIssue(ctx context.Context, repoOwner, repoName, title string) (*Issue, error) {
