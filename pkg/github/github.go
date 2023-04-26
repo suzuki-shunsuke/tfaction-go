@@ -207,7 +207,7 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 				State:  strings.ToLower(string(issue.Issue.State)),
 			})
 			if len(allIssues) == numOfIssues {
-				break
+				return allIssues, nil
 			}
 		}
 		if !q.Search.PageInfo.HasNextPage {
