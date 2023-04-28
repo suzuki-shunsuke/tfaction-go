@@ -67,9 +67,9 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		// Merge cfg and targetGroup and workingDirectory
 		runsOn := "ubuntu-latest"
 		for _, r := range []string{
-			workingDirectory.TerraformPlanConfig.RunsOn,
+			workingDirectory.TerraformPlanConfig.GetRunsOn(),
 			workingDirectory.RunsOn,
-			targetGroup.TerraformPlanConfig.RunsOn,
+			targetGroup.TerraformPlanConfig.GetRunsOn(),
 			targetGroup.RunsOn,
 			cfg.RunsOn,
 		} {

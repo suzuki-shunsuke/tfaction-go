@@ -74,6 +74,13 @@ type Job struct {
 	RunsOn string `yaml:"runs_on"`
 }
 
+func (job *Job) GetRunsOn() string {
+	if job == nil {
+		return ""
+	}
+	return job.RunsOn
+}
+
 func Read(fs afero.Fs) (*Config, error) {
 	f, err := fs.Open("tfaction-root.yaml")
 	if err != nil {
