@@ -52,13 +52,37 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		repoName = cfg.DriftDetection.IssueRepoName
 	}
 
-	workingDirectoryPaths, err := createdriftissues.ListWorkingDirectoryPaths(cfg, param.PWD)
+	workingDirectories, err := createdriftissues.ListWorkingDirectoryPaths(ctrl.fs, cfg, param.PWD)
 	if err != nil {
 		return fmt.Errorf("list working directories: %w", err)
 	}
 
-	logE.WithField("num_of_working_dirs", len(workingDirectoryPaths)).Debug("search working directories")
-	targets := createdriftissues.ListTargets(cfg.TargetGroups, workingDirectoryPaths)
+	targets := map[string]string{}
+	for workingDirectoryPath, workingDirectory := range workingDirectories {
+		targetGroup := createdriftissues.GetTargetGroupByWorkingDirectory(cfg.TargetGroups, workingDirectoryPath)
+		if targetGroup == nil {
+			continue
+		}
+		target := createdriftissues.GetTargetByWorkingDirectory(workingDirectoryPath, targetGroup)
+		// Merge cfg and targetGroup and workingDirectory
+		runsOn := "ubuntu-latest"
+		for _, r := range []string{
+			workingDirectory.TerraformPlanConfig.RunsOn,
+			workingDirectory.RunsOn,
+			targetGroup.TerraformPlanConfig.RunsOn,
+			targetGroup.RunsOn,
+			cfg.RunsOn,
+		} {
+			if r == "" {
+				continue
+			}
+			runsOn = r
+			break
+		}
+		targets[target] = runsOn
+	}
+
+	logE.WithField("num_of_working_dirs", len(workingDirectories)).Debug("search working directories")
 	logE.WithField("num_of_targets", len(targets)).Debug("convert working directories to targets")
 
 	deadline := time.Now().In(time.FixedZone("UTC", 0)).Add(-time.Duration(cfg.DriftDetection.Duration) * time.Hour).Format("2006-01-02T15:04:05+00:00")
@@ -75,7 +99,8 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 
 	arr := make([]*github.Issue, 0, len(issues))
 	for _, issue := range issues {
-		if _, ok := targets[issue.Target]; ok {
+		if runsOn, ok := targets[issue.Target]; ok {
+			issue.RunsOn = runsOn
 			arr = append(arr, issue)
 			continue
 		}

@@ -88,6 +88,7 @@ type Issue struct {
 	Title  string `json:"title,omitempty"`
 	Target string `json:"target,omitempty"`
 	State  string `json:"state,omitempty"`
+	RunsOn string `json:"runs_on,omitempty"`
 }
 
 var titlePattern = regexp.MustCompile(`^Terraform Drift \((\S+)\)$`)

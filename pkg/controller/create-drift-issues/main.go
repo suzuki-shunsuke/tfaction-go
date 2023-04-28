@@ -33,8 +33,8 @@ type Param struct {
 	PWD       string
 }
 
-func ListWorkingDirectoryPaths(cfg *config.Config, pwd string) ([]string, error) {
-	workingDirectoryPaths := []string{}
+func ListWorkingDirectoryPaths(aferoFs afero.Fs, cfg *config.Config, pwd string) (map[string]*config.WorkingDirectory, error) {
+	workingDirectoryPaths := map[string]*config.WorkingDirectory{}
 	baseWorkingDirectory := filepath.Join(pwd, cfg.BaseWorkingDirectory)
 	if err := filepath.WalkDir(baseWorkingDirectory, func(p string, dirEntry fs.DirEntry, e error) error {
 		if dirEntry.Name() != cfg.WorkingDirectoryFile {
@@ -44,7 +44,13 @@ func ListWorkingDirectoryPaths(cfg *config.Config, pwd string) ([]string, error)
 		if err != nil {
 			return fmt.Errorf("get a relative path of a working directory: %w", err)
 		}
-		workingDirectoryPaths = append(workingDirectoryPaths, f)
+
+		wdCfg, err := config.ReadWorkingDirectory(aferoFs, p)
+		if err != nil {
+			return fmt.Errorf("read %s: %w", p, err)
+		}
+		workingDirectoryPaths[f] = wdCfg
+
 		return nil
 	}); err != nil {
 		return nil, fmt.Errorf("search working directories: %w", err)
@@ -52,14 +58,24 @@ func ListWorkingDirectoryPaths(cfg *config.Config, pwd string) ([]string, error)
 	return workingDirectoryPaths, nil
 }
 
+func GetTargetGroupByWorkingDirectory(targetGroups []*config.TargetGroup, workingDirectoryPath string) *config.TargetGroup {
+	for _, targetGroup := range targetGroups {
+		if strings.HasPrefix(workingDirectoryPath, targetGroup.WorkingDirectory) {
+			return targetGroup
+		}
+	}
+	return nil
+}
+
+func GetTargetByWorkingDirectory(workingDirectoryPath string, targetGroup *config.TargetGroup) string {
+	return strings.Replace(workingDirectoryPath, targetGroup.WorkingDirectory, targetGroup.Target, 1)
+}
+
 func ListTargets(targetGroups []*config.TargetGroup, workingDirectoryPaths []string) map[string]struct{} {
 	targets := make(map[string]struct{}, len(workingDirectoryPaths))
 	for _, workingDirectoryPath := range workingDirectoryPaths {
-		for _, targetGroup := range targetGroups {
-			if strings.HasPrefix(workingDirectoryPath, targetGroup.WorkingDirectory) {
-				targets[strings.Replace(workingDirectoryPath, targetGroup.WorkingDirectory, targetGroup.Target, 1)] = struct{}{}
-				break
-			}
+		if targetGroup := GetTargetGroupByWorkingDirectory(targetGroups, workingDirectoryPath); targetGroup != nil {
+			targets[GetTargetByWorkingDirectory(workingDirectoryPath, targetGroup)] = struct{}{}
 		}
 	}
 	return targets
@@ -88,26 +104,33 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		}
 	}
 
-	workingDirectoryPaths, err := ListWorkingDirectoryPaths(cfg, param.PWD)
+	workingDirectories, err := ListWorkingDirectoryPaths(ctrl.fs, cfg, param.PWD)
 	if err != nil {
 		return err
 	}
+	workingDirectoryPaths := make([]string, 0, len(workingDirectories))
+	for k := range workingDirectories {
+		workingDirectoryPaths = append(workingDirectoryPaths, k)
+	}
 
-	logE.WithField("num_of_working_dirs", len(workingDirectoryPaths)).Debug("search working directories")
+	logE.WithField("num_of_working_dirs", len(workingDirectories)).Debug("search working directories")
 	targets := ListTargets(cfg.TargetGroups, workingDirectoryPaths)
 	logE.WithField("num_of_targets", len(targets)).Debug("convert working directories to targets")
+
 	// Search GitHub Issues
 	issues, err := ctrl.gh.ListIssues(ctx, repoOwner, repoName)
 	if err != nil {
 		return fmt.Errorf("list issues: %w", err)
 	}
 	logE.WithField("num_of_issues", len(issues)).Debug("search GiHub issues")
+
 	issueTargets := make(map[string]struct{}, len(issues))
 	issueMap := make(map[string]*github.Issue, len(issues))
 	for _, issue := range issues {
 		issueTargets[issue.Target] = struct{}{}
 		issueMap[issue.Target] = issue
 	}
+
 	for target := range targets {
 		logE := logE.WithField("target", target)
 		if _, ok := issueTargets[target]; ok {
@@ -130,6 +153,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 			Title:  issue.GetTitle(),
 		}
 	}
+
 	for target, issue := range issueMap {
 		// Rename issues whose targets are not found
 		if _, ok := targets[target]; ok {
@@ -144,5 +168,6 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		}
 		logE.Info("archive an issue")
 	}
+
 	return nil
 }

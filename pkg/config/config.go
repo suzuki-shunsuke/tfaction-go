@@ -18,6 +18,7 @@ type configRaw struct {
 	WorkingDirectoryFile string          `yaml:"working_directory_file"`
 	TargetGroups         []*TargetGroup  `yaml:"target_groups"`
 	DriftDetection       *DriftDetection `yaml:"drift_detection"`
+	RunsOn               string          `yaml:"runs_on"`
 }
 
 func (cr *configRaw) Config() *Config {
@@ -26,6 +27,7 @@ func (cr *configRaw) Config() *Config {
 		WorkingDirectoryFile: cr.WorkingDirectoryFile,
 		TargetGroups:         cr.TargetGroups,
 		DriftDetection:       cr.DriftDetection,
+		RunsOn:               cr.RunsOn,
 	}
 	if cfg.DriftDetection != nil {
 		if cfg.DriftDetection.NumOfIssues == 0 {
@@ -46,6 +48,12 @@ type Config struct {
 	WorkingDirectoryFile string
 	TargetGroups         []*TargetGroup
 	DriftDetection       *DriftDetection
+	RunsOn               string
+}
+
+type WorkingDirectory struct {
+	RunsOn              string `yaml:"runs_on"`
+	TerraformPlanConfig *Job   `yaml:"terraform_plan_config"`
 }
 
 type DriftDetection struct {
@@ -56,8 +64,14 @@ type DriftDetection struct {
 }
 
 type TargetGroup struct {
-	WorkingDirectory string `yaml:"working_directory"`
-	Target           string
+	WorkingDirectory    string `yaml:"working_directory"`
+	Target              string
+	RunsOn              string `yaml:"runs_on"`
+	TerraformPlanConfig *Job   `yaml:"terraform_plan_config"`
+}
+
+type Job struct {
+	RunsOn string `yaml:"runs_on"`
 }
 
 func Read(fs afero.Fs) (*Config, error) {
@@ -71,4 +85,17 @@ func Read(fs afero.Fs) (*Config, error) {
 		return nil, fmt.Errorf("read tfaction-root.yaml: %w", err)
 	}
 	return cfg.Config(), nil
+}
+
+func ReadWorkingDirectory(fs afero.Fs, p string) (*WorkingDirectory, error) {
+	f, err := fs.Open(p)
+	if err != nil {
+		return nil, fmt.Errorf("open %s: %w", p, err)
+	}
+	defer f.Close()
+	cfg := &WorkingDirectory{}
+	if err := yaml.NewDecoder(f).Decode(cfg); err != nil {
+		return nil, fmt.Errorf("read %s: %w", p, err)
+	}
+	return cfg, nil
 }
