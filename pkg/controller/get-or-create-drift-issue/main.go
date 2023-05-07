@@ -94,7 +94,7 @@ func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, rep
 	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.GetNumber()))
 	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_STATE", "open")
 
-	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, *issue.Number)
+	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.GetNumber())
 	ctrl.action.Infof(issueURL)
 	ctrl.action.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
 
