@@ -52,7 +52,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		repoName = cfg.DriftDetection.IssueRepoName
 	}
 
-	workingDirectories, err := createdriftissues.ListWorkingDirectoryPaths(ctrl.fs, cfg, param.PWD)
+	workingDirectories, err := createdriftissues.ListWorkingDirectories(ctrl.fs, cfg, param.PWD)
 	if err != nil {
 		return fmt.Errorf("list working directories: %w", err)
 	}

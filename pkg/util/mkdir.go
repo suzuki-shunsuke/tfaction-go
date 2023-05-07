@@ -1,0 +1,11 @@
+package util
+
+import "github.com/spf13/afero"
+
+func MkdirAll(fs afero.Fs, p string) error {
+	return fs.MkdirAll(p, dirPermission) //nolint:wrapcheck
+}
+
+func WriteFile(fs afero.Fs, p string, b []byte) error {
+	return afero.WriteFile(fs, p, b, FilePermission) //nolint:wrapcheck
+}

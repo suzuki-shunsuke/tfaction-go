@@ -69,6 +69,7 @@ func getHTTPClientForGitHub(ctx context.Context, token string) *http.Client {
 	))
 }
 
+//go:generate mockery --name Client --testonly=false
 type Client interface {
 	ListIssues(ctx context.Context, repoOwner, repoName string) ([]*Issue, error)
 	ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOwner, repoName string, numOfIssues int, deadline string) ([]*Issue, error)
