@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/sethvargo/go-githubactions"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
@@ -16,14 +15,16 @@ import (
 )
 
 type Controller struct {
-	gh github.Client
-	fs afero.Fs
+	gh     github.Client
+	fs     afero.Fs
+	action Action
 }
 
-func New(gh github.Client, fs afero.Fs) *Controller {
+func New(gh github.Client, fs afero.Fs, action Action) *Controller {
 	return &Controller{
-		gh: gh,
-		fs: fs,
+		gh:     gh,
+		fs:     fs,
+		action: action,
 	}
 }
 
@@ -61,17 +62,21 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		return ctrl.createIssue(ctx, logE, repoOwner, repoName, param)
 	}
 
-	githubactions.SetOutput("issue_number", strconv.Itoa(issue.Number))
-	githubactions.SetOutput("issue_state", issue.State)
-
-	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.Number))
-	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_STATE", issue.State)
+	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.Number))
+	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_STATE", issue.State)
 
 	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.Number)
-	githubactions.Infof(issueURL)
-	githubactions.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
+	ctrl.action.Infof(issueURL)
+	ctrl.action.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
 
 	return nil
+}
+
+//go:generate mockery --name Action --testonly=false
+type Action interface {
+	AddStepSummary(markdown string)
+	Infof(msg string, args ...interface{})
+	SetEnv(k, v string)
 }
 
 func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, repoOwner, repoName string, param *Param) error {
@@ -85,15 +90,12 @@ func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, rep
 	}
 	logE.Info("created an issue")
 
-	githubactions.SetOutput("issue_number", strconv.Itoa(issue.GetNumber()))
-	githubactions.SetOutput("issue_state", "open")
+	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.GetNumber()))
+	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_STATE", "open")
 
-	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.GetNumber()))
-	githubactions.SetEnv("TFACTION_DRIFT_ISSUE_STATE", "open")
-
-	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.Number)
-	githubactions.Infof(issueURL)
-	githubactions.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
+	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, *issue.Number)
+	ctrl.action.Infof(issueURL)
+	ctrl.action.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
 
 	return nil
 }

@@ -92,7 +92,7 @@ target_groups:
 			gh.EXPECT().ArchiveIssue(ctx, "suzuki-shunsuke", "test-tfaction", 2, "Archived Terraform Drift (aws/zoo/development)").Return(nil, nil)
 
 			fs := afero.NewMemMapFs()
-			for _, k := range d.files {
+			for _, k := range d.dirs {
 				if err := util.MkdirAll(fs, k); err != nil {
 					t.Fatal(err)
 				}

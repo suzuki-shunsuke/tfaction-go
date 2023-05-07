@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/sethvargo/go-githubactions"
 	"github.com/spf13/afero"
 	issue "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/get-or-create-drift-issue"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
@@ -29,7 +30,7 @@ func (runner *Runner) getOrCreateDriftIssueAction(c *cli.Context) error {
 		return fmt.Errorf("set up a GitHub Client: %w", err)
 	}
 	fs := afero.NewOsFs()
-	ctrl := issue.New(gh, fs)
+	ctrl := issue.New(gh, fs, githubactions.New())
 	log.SetLevel(c.String("log-level"), runner.LogE)
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	repoOwner, repoName, found := strings.Cut(repo, "/")
