@@ -77,6 +77,7 @@ type Action interface {
 	AddStepSummary(markdown string)
 	Infof(msg string, args ...interface{})
 	SetEnv(k, v string)
+	SetOutput(k, v string)
 }
 
 func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, repoOwner, repoName string, param *Param) error {

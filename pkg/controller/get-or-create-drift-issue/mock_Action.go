@@ -128,6 +128,40 @@ func (_c *MockAction_SetEnv_Call) RunAndReturn(run func(string, string)) *MockAc
 	return _c
 }
 
+// SetOutput provides a mock function with given fields: k, v
+func (_m *MockAction) SetOutput(k string, v string) {
+	_m.Called(k, v)
+}
+
+// MockAction_SetOutput_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetOutput'
+type MockAction_SetOutput_Call struct {
+	*mock.Call
+}
+
+// SetOutput is a helper method to define mock.On call
+//   - k string
+//   - v string
+func (_e *MockAction_Expecter) SetOutput(k interface{}, v interface{}) *MockAction_SetOutput_Call {
+	return &MockAction_SetOutput_Call{Call: _e.mock.On("SetOutput", k, v)}
+}
+
+func (_c *MockAction_SetOutput_Call) Run(run func(k string, v string)) *MockAction_SetOutput_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockAction_SetOutput_Call) Return() *MockAction_SetOutput_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *MockAction_SetOutput_Call) RunAndReturn(run func(string, string)) *MockAction_SetOutput_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 type mockConstructorTestingTNewMockAction interface {
 	mock.TestingT
 	Cleanup(func())

@@ -1,11 +1,13 @@
-package cli //nolint:dupl
+package cli
 
 import (
 	"errors"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/sethvargo/go-githubactions"
 	"github.com/spf13/afero"
 	issues "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/pick-out-drift-issues"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
@@ -29,7 +31,7 @@ func (runner *Runner) pickOutDriftIssuesAction(c *cli.Context) error {
 		return fmt.Errorf("set up a GitHub Client: %w", err)
 	}
 	fs := afero.NewOsFs()
-	ctrl := issues.New(gh, fs)
+	ctrl := issues.New(gh, fs, githubactions.New())
 	log.SetLevel(c.String("log-level"), runner.LogE)
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	repoOwner, repoName, found := strings.Cut(repo, "/")
@@ -44,5 +46,6 @@ func (runner *Runner) pickOutDriftIssuesAction(c *cli.Context) error {
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
 		PWD:       pwd,
+		Now:       time.Now(),
 	})
 }

@@ -11,18 +11,21 @@ import (
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/config"
 	createdriftissues "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/create-drift-issues"
+	issue "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/get-or-create-drift-issue"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
 )
 
 type Controller struct {
-	gh github.Client
-	fs afero.Fs
+	gh     github.Client
+	fs     afero.Fs
+	action issue.Action
 }
 
-func New(gh github.Client, fs afero.Fs) *Controller {
+func New(gh github.Client, fs afero.Fs, action issue.Action) *Controller {
 	return &Controller{
-		gh: gh,
-		fs: fs,
+		gh:     gh,
+		fs:     fs,
+		action: action,
 	}
 }
 
@@ -30,6 +33,7 @@ type Param struct {
 	RepoOwner string
 	RepoName  string
 	PWD       string
+	Now       time.Time
 }
 
 func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:funlen,cyclop
@@ -85,7 +89,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 	logE.WithField("num_of_working_dirs", len(workingDirectories)).Debug("search working directories")
 	logE.WithField("num_of_targets", len(targets)).Debug("convert working directories to targets")
 
-	deadline := time.Now().In(time.FixedZone("UTC", 0)).Add(-time.Duration(cfg.DriftDetection.Duration) * time.Hour).Format("2006-01-02T15:04:05+00:00")
+	deadline := getDeadline(param.Now, cfg.DriftDetection.Duration)
 	logE.WithFields(logrus.Fields{
 		"duration": cfg.DriftDetection.Duration,
 		"deadline": deadline,
@@ -114,17 +118,25 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		logE.Info("archive an issue")
 	}
 
-	if len(arr) == 0 {
-		githubactions.SetOutput("has_issues", "false")
-		githubactions.SetOutput("issues", "[]")
+	return ctrl.setOutput(arr)
+}
+
+func (ctrl *Controller) setOutput(issues []*github.Issue) error {
+	if len(issues) == 0 {
+		ctrl.action.SetOutput("has_issues", "false")
+		ctrl.action.SetOutput("issues", "[]")
 		return nil
 	}
 
-	githubactions.SetOutput("has_issues", "true")
-	b, err := json.Marshal(arr)
+	ctrl.action.SetOutput("has_issues", "true")
+	b, err := json.Marshal(issues)
 	if err != nil {
 		return fmt.Errorf("marshal issues as JSON: %w", err)
 	}
-	githubactions.SetOutput("issues", string(b))
+	ctrl.action.SetOutput("issues", string(b))
 	return nil
+}
+
+func getDeadline(now time.Time, duration int) string {
+	return now.In(time.FixedZone("UTC", 0)).Add(-time.Duration(duration) * time.Hour).Format("2006-01-02T15:04:05+00:00")
 }
