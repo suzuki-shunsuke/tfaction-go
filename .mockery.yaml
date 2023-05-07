@@ -1,0 +1,5 @@
+# https://github.com/vektra/mockery
+inpackage: True
+testonly: True
+with-expecter: True
+keeptree: False
