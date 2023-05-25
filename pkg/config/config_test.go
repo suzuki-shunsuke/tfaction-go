@@ -52,8 +52,8 @@ target_groups:
 				BaseWorkingDirectory: "tfaction",
 				WorkingDirectoryFile: "tf.yaml",
 				DriftDetection: &config.DriftDetection{
-					NumOfIssues: 1,
-					Duration:    168,
+					NumOfIssues:              1,
+					MinimumDetectionInterval: 168,
 				},
 				TargetGroups: []*config.TargetGroup{
 					{
@@ -71,7 +71,7 @@ base_working_directory: tfaction
 working_directory_file: tf.yaml
 drift_detection:
   num_of_issues: 3
-  duration: 5
+  minimum_detection_interval: 5
   issue_repo_owner: foo
   issue_repo_name: bar
 target_groups:
@@ -83,10 +83,10 @@ target_groups:
 				BaseWorkingDirectory: "tfaction",
 				WorkingDirectoryFile: "tf.yaml",
 				DriftDetection: &config.DriftDetection{
-					NumOfIssues:    3,
-					Duration:       5,
-					IssueRepoOwner: "foo",
-					IssueRepoName:  "bar",
+					NumOfIssues:              3,
+					MinimumDetectionInterval: 5,
+					IssueRepoOwner:           "foo",
+					IssueRepoName:            "bar",
 				},
 				TargetGroups: []*config.TargetGroup{
 					{

@@ -10,7 +10,7 @@ import (
 /*
 drift_detection:
   number_of_issues: 1
-  duration: 168 # 24 * 7 = 7 days
+  minimum_detection_interval: 168 # 24 * 7 = 7 days
 */
 
 type configRaw struct {
@@ -33,8 +33,8 @@ func (cr *configRaw) Config() *Config {
 		if cfg.DriftDetection.NumOfIssues == 0 {
 			cfg.DriftDetection.NumOfIssues = 1
 		}
-		if cfg.DriftDetection.Duration == 0 {
-			cfg.DriftDetection.Duration = 168
+		if cfg.DriftDetection.MinimumDetectionInterval == 0 {
+			cfg.DriftDetection.MinimumDetectionInterval = 168
 		}
 	}
 	if cfg.WorkingDirectoryFile == "" {
@@ -57,10 +57,10 @@ type WorkingDirectory struct {
 }
 
 type DriftDetection struct {
-	NumOfIssues    int `yaml:"num_of_issues"`
-	Duration       int
-	IssueRepoOwner string `yaml:"issue_repo_owner"`
-	IssueRepoName  string `yaml:"issue_repo_name"`
+	NumOfIssues              int    `yaml:"num_of_issues"`
+	MinimumDetectionInterval int    `yaml:"minimum_detection_interval"`
+	IssueRepoOwner           string `yaml:"issue_repo_owner"`
+	IssueRepoName            string `yaml:"issue_repo_name"`
 }
 
 type TargetGroup struct {

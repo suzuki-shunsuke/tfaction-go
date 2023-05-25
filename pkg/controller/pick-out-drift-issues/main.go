@@ -89,10 +89,10 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 	logE.WithField("num_of_working_dirs", len(workingDirectories)).Debug("search working directories")
 	logE.WithField("num_of_targets", len(targets)).Debug("convert working directories to targets")
 
-	deadline := getDeadline(param.Now, cfg.DriftDetection.Duration)
+	deadline := getDeadline(param.Now, cfg.DriftDetection.MinimumDetectionInterval)
 	logE.WithFields(logrus.Fields{
-		"duration": cfg.DriftDetection.Duration,
-		"deadline": deadline,
+		"minimum_detection_interval": cfg.DriftDetection.MinimumDetectionInterval,
+		"deadline":                   deadline,
 	}).Info("check a deadline")
 
 	issues, err := ctrl.gh.ListLeastRecentlyUpdatedIssues(ctx, param.RepoOwner, param.RepoName, cfg.DriftDetection.NumOfIssues, deadline)
