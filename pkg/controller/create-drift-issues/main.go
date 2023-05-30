@@ -126,7 +126,7 @@ func ListWorkingDirectories(aferoFs afero.Fs, cfg *config.Config, pwd string) (m
 		if dirEntry.Name() != cfg.WorkingDirectoryFile {
 			return nil
 		}
-		f, err := filepath.Rel(baseWorkingDirectory, filepath.Dir(p))
+		f, err := filepath.Rel(pwd, filepath.Dir(p))
 		if err != nil {
 			return fmt.Errorf("get a relative path of a working directory: %w", err)
 		}
