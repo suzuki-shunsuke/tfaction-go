@@ -32,6 +32,10 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 	if err != nil {
 		return fmt.Errorf("read tfaction-root.yaml: %w", err)
 	}
+	if cfg.DriftDetection == nil {
+		logE.Info("drift_detection is null")
+		return nil
+	}
 
 	repoOwner := param.RepoOwner
 	repoName := param.RepoName
@@ -48,13 +52,9 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 	if err != nil {
 		return err
 	}
-	workingDirectoryPaths := make([]string, 0, len(workingDirectories))
-	for k := range workingDirectories {
-		workingDirectoryPaths = append(workingDirectoryPaths, k)
-	}
 
 	logE.WithField("num_of_working_dirs", len(workingDirectories)).Debug("search working directories")
-	targets := ListTargets(cfg.TargetGroups, workingDirectoryPaths)
+	targets := ListTargets(cfg, workingDirectories)
 	logE.WithField("num_of_targets", len(targets)).Debug("convert working directories to targets")
 
 	// Search GitHub Issues
@@ -157,14 +157,32 @@ func GetTargetByWorkingDirectory(workingDirectoryPath string, targetGroup *confi
 	return strings.Replace(workingDirectoryPath, targetGroup.WorkingDirectory, targetGroup.Target, 1)
 }
 
-func ListTargets(targetGroups []*config.TargetGroup, workingDirectoryPaths []string) map[string]struct{} {
-	targets := make(map[string]struct{}, len(workingDirectoryPaths))
-	for _, workingDirectoryPath := range workingDirectoryPaths {
-		if targetGroup := GetTargetGroupByWorkingDirectory(targetGroups, workingDirectoryPath); targetGroup != nil {
-			targets[GetTargetByWorkingDirectory(workingDirectoryPath, targetGroup)] = struct{}{}
+func ListTargets(cfg *config.Config, workingDirectories map[string]*config.WorkingDirectory) map[string]struct{} {
+	targets := make(map[string]struct{}, len(workingDirectories))
+	for workingDirectoryPath, wdCfg := range workingDirectories {
+		if targetGroup := GetTargetGroupByWorkingDirectory(cfg.TargetGroups, workingDirectoryPath); targetGroup != nil {
+			if CheckEnabled(cfg, targetGroup, wdCfg) {
+				targets[GetTargetByWorkingDirectory(workingDirectoryPath, targetGroup)] = struct{}{}
+			}
 		}
 	}
 	return targets
+}
+
+func CheckEnabled(cfg *config.Config, targetGroup *config.TargetGroup, wdCfg *config.WorkingDirectory) bool {
+	if wdCfg.DriftDetection != nil {
+		if wdCfg.DriftDetection.Enabled != nil {
+			return *wdCfg.DriftDetection.Enabled
+		}
+		return true
+	}
+	if targetGroup.DriftDetection != nil {
+		if targetGroup.DriftDetection.Enabled != nil {
+			return *targetGroup.DriftDetection.Enabled
+		}
+		return true
+	}
+	return cfg.DriftDetection.Enabled == nil || *cfg.DriftDetection.Enabled
 }
 
 const IssueBodyTemplate = `

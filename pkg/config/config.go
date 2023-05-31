@@ -52,11 +52,17 @@ type Config struct {
 }
 
 type WorkingDirectory struct {
-	RunsOn              string `yaml:"runs_on"`
-	TerraformPlanConfig *Job   `yaml:"terraform_plan_config"`
+	RunsOn              string                `yaml:"runs_on"`
+	TerraformPlanConfig *Job                  `yaml:"terraform_plan_config"`
+	DriftDetection      *DriftDetectionSwitch `yaml:"drift_detection"`
+}
+
+type DriftDetectionSwitch struct {
+	Enabled *bool
 }
 
 type DriftDetection struct {
+	Enabled                  *bool
 	NumOfIssues              int    `yaml:"num_of_issues"`
 	MinimumDetectionInterval int    `yaml:"minimum_detection_interval"`
 	IssueRepoOwner           string `yaml:"issue_repo_owner"`
@@ -66,8 +72,9 @@ type DriftDetection struct {
 type TargetGroup struct {
 	WorkingDirectory    string `yaml:"working_directory"`
 	Target              string
-	RunsOn              string `yaml:"runs_on"`
-	TerraformPlanConfig *Job   `yaml:"terraform_plan_config"`
+	RunsOn              string                `yaml:"runs_on"`
+	TerraformPlanConfig *Job                  `yaml:"terraform_plan_config"`
+	DriftDetection      *DriftDetectionSwitch `yaml:"drift_detection"`
 }
 
 type Job struct {
