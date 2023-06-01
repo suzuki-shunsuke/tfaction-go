@@ -3,7 +3,9 @@ package issue
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
@@ -35,7 +37,7 @@ type Param struct {
 	GitHubServerURL string
 }
 
-func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error {
+func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:funlen,cyclop
 	// Get or create a drift issue
 	cfg, err := config.Read(ctrl.fs)
 	if err != nil {
@@ -51,6 +53,32 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 	}
 	if cfg.DriftDetection.IssueRepoName != "" {
 		repoName = cfg.DriftDetection.IssueRepoName
+	}
+
+	var wgCfg *config.WorkingDirectory
+	var targetGroup *config.TargetGroup
+	for _, t := range cfg.TargetGroups {
+		t := t
+		if !strings.HasPrefix(param.Target, t.Target) {
+			continue
+		}
+		targetGroup = t
+		wd := strings.Replace(param.Target, targetGroup.Target, targetGroup.WorkingDirectory, 1)
+		p := filepath.Join(wd, cfg.WorkingDirectoryFile)
+		w, err := config.ReadWorkingDirectory(ctrl.fs, p)
+		if err != nil {
+			return fmt.Errorf("read %s: %w", p, err)
+		}
+		wgCfg = w
+		break
+	}
+	if wgCfg == nil {
+		return nil
+	}
+
+	if !createdriftissues.CheckEnabled(cfg, targetGroup, wgCfg) {
+		logE.Info("drifit detection is disabled")
+		return nil
 	}
 
 	// Find a drift issue from target

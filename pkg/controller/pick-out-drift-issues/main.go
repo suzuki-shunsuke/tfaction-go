@@ -67,6 +67,9 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		if targetGroup == nil {
 			continue
 		}
+		if !createdriftissues.CheckEnabled(cfg, targetGroup, workingDirectory) {
+			continue
+		}
 		target := createdriftissues.GetTargetByWorkingDirectory(workingDirectoryPath, targetGroup)
 		// Merge cfg and targetGroup and workingDirectory
 		runsOn := "ubuntu-latest"
