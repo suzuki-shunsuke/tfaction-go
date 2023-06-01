@@ -3,15 +3,9 @@
 CLI for [tfaction](https://github.com/suzuki-shunsuke/tfaction).
 
 This CLI is used in GitHub Actions Workflows built with tfaction.
-This CLI was introduced for Drift Detection. [#851](https://github.com/suzuki-shunsuke/tfaction/issues/851)
+This CLI was introduced for Drift Detection.
 
-## Status
-
-Still alpha
-
-## Document
-
-Coming soon.
+https://suzuki-shunsuke.github.io/tfaction/docs/feature/drift-detection
 
 ## Usage
 
