@@ -38,6 +38,7 @@ target_groups:
 - working_directory: aws/
   target: aws/
 `,
+				"aws/bar/production/tfaction.yaml": `{}`,
 			},
 			setGH: func(ctx context.Context, gh *github.MockClient) {
 				gh.EXPECT().CreateIssue(ctx, "suzuki-shunsuke", "test-tfaction", &github.IssueRequest{
@@ -71,6 +72,7 @@ target_groups:
 - working_directory: aws/
   target: aws/
 `,
+				"aws/bar/production/tfaction.yaml": `{}`,
 			},
 			setGH: func(ctx context.Context, gh *github.MockClient) {
 				gh.EXPECT().GetIssue(ctx, "suzuki-shunsuke", "test-tfaction", "Terraform Drift (aws/bar/production)").Return(&github.Issue{
