@@ -98,7 +98,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		"deadline":                   deadline,
 	}).Info("check a deadline")
 
-	issues, err := ctrl.gh.ListLeastRecentlyUpdatedIssues(ctx, param.RepoOwner, param.RepoName, cfg.DriftDetection.NumOfIssues, deadline)
+	issues, err := ctrl.gh.ListLeastRecentlyUpdatedIssues(ctx, repoOwner, repoName, cfg.DriftDetection.NumOfIssues, deadline)
 	if err != nil {
 		return fmt.Errorf("list drift issues: %w", err)
 	}
