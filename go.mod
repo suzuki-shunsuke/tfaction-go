@@ -12,7 +12,7 @@ require (
 	github.com/spf13/afero v1.11.0
 	github.com/stretchr/testify v1.8.4
 	github.com/suzuki-shunsuke/logrus-error v0.1.4
-	github.com/urfave/cli/v2 v2.25.7
+	github.com/urfave/cli/v2 v2.26.0
 	golang.org/x/oauth2 v0.15.0
 	gopkg.in/yaml.v3 v3.0.1
 )
