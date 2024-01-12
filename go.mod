@@ -1,12 +1,14 @@
 module github.com/suzuki-shunsuke/tfaction-go
 
-go 1.20
+go 1.21
+
+toolchain go1.21.6
 
 require (
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v53 v53.2.0
 	github.com/mattn/go-colorable v0.1.13
-	github.com/sethvargo/go-githubactions v1.1.0
+	github.com/sethvargo/go-githubactions v1.2.0
 	github.com/shurcooL/githubv4 v0.0.0-20230305132112-efb623903184
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/afero v1.11.0
