@@ -37,7 +37,7 @@ type Param struct {
 	GitHubServerURL string
 }
 
-func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:funlen,cyclop
+func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:cyclop
 	// Get or create a drift issue
 	cfg, err := config.Read(ctrl.fs)
 	if err != nil {
@@ -58,7 +58,6 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 	var wgCfg *config.WorkingDirectory
 	var targetGroup *config.TargetGroup
 	for _, t := range cfg.TargetGroups {
-		t := t
 		if !strings.HasPrefix(param.Target, t.Target) {
 			continue
 		}
