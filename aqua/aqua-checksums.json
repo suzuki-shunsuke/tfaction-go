@@ -1,33 +1,33 @@
 {
   "checksums": [
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.52.2/golangci-lint-1.52.2-darwin-amd64.tar.gz",
-      "checksum": "E57F2599DE73C4DA1D36D5255B9BAEC63F448B3D7FB726EBD3CD64DABBD3EE4A",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.59.1/golangci-lint-1.59.1-darwin-amd64.tar.gz",
+      "checksum": "2F945063394A489C0037F0369C0CE21BC007565C08F90B924A35F4C04721CBC0",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.52.2/golangci-lint-1.52.2-darwin-arm64.tar.gz",
-      "checksum": "89E523D45883903CFC472AB65621073F850ABD4FFBB7720BBDD7BA66EE490BC8",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.59.1/golangci-lint-1.59.1-darwin-arm64.tar.gz",
+      "checksum": "16EC8A86974DDEBD466A5CC071BB9F44D06D2A1F4BF93D13FBCB59E1704EDB39",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.52.2/golangci-lint-1.52.2-linux-amd64.tar.gz",
-      "checksum": "C9CF72D12058A131746EDD409ED94CCD578FBD178899D1ED41CEAE3CE5F54501",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.59.1/golangci-lint-1.59.1-linux-amd64.tar.gz",
+      "checksum": "C30696F1292CFF8778A495400745F0F9C0406A3F38D8BB12CEF48D599F6C7791",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.52.2/golangci-lint-1.52.2-linux-arm64.tar.gz",
-      "checksum": "FC09A97F8888809FAB83A316F7DA70C8ED74D4863B7EED7D872CEC41911A55E8",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.59.1/golangci-lint-1.59.1-linux-arm64.tar.gz",
+      "checksum": "8264507B560AE89DD080D5A0C7198CA5198E2B45F937A1F7FD873A8BAA8E0B8F",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.52.2/golangci-lint-1.52.2-windows-amd64.zip",
-      "checksum": "40B40002E07DB81628D94108265525052C58FC9CE358BEF26A36D27F0AEA3D87",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.59.1/golangci-lint-1.59.1-windows-amd64.zip",
+      "checksum": "82EB91E8E3CBBC987D8BB5684CAAAA12AEB39479135BEA90D2805512233F4741",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/golangci/golangci-lint/v1.52.2/golangci-lint-1.52.2-windows-arm64.zip",
-      "checksum": "6891597BEDBCD7E530D08ED198BAB7EEB9B23F3F8161DC6E87505B783CB11593",
+      "id": "github_release/github.com/golangci/golangci-lint/v1.59.1/golangci-lint-1.59.1-windows-arm64.zip",
+      "checksum": "5DEAAF959E415DF9F610059923B0AE40413FE3A5602C493BB84EC57581594901",
       "algorithm": "sha256"
     },
     {

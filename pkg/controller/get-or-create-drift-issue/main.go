@@ -95,7 +95,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 
 	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.Number)
 	ctrl.action.Infof(issueURL)
-	ctrl.action.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
+	ctrl.action.AddStepSummary("Drift Issue: " + issueURL)
 
 	return nil
 }
@@ -124,7 +124,7 @@ func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, rep
 
 	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.GetNumber())
 	ctrl.action.Infof(issueURL)
-	ctrl.action.AddStepSummary(fmt.Sprintf("Drift Issue: %s", issueURL))
+	ctrl.action.AddStepSummary("Drift Issue: " + issueURL)
 
 	return nil
 }
