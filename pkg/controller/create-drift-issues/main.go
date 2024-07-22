@@ -104,7 +104,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 			"target":       target,
 			"issue_number": issue.Number,
 		})
-		if _, err := ctrl.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, fmt.Sprintf(`Archived %s`, issue.Title)); err != nil {
+		if _, err := ctrl.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, "Archived "+issue.Title); err != nil {
 			logE.WithError(err).Error("archive an issue")
 		}
 		logE.Info("archive an issue")
@@ -123,6 +123,9 @@ func ListWorkingDirectories(aferoFs afero.Fs, cfg *config.Config, pwd string) (m
 	workingDirectoryPaths := map[string]*config.WorkingDirectory{}
 	baseWorkingDirectory := filepath.Join(pwd, cfg.BaseWorkingDirectory)
 	if err := fs.WalkDir(afero.NewIOFS(aferoFs), baseWorkingDirectory, func(p string, dirEntry fs.DirEntry, e error) error {
+		if e != nil {
+			return e
+		}
 		if dirEntry.Name() != cfg.WorkingDirectoryFile {
 			return nil
 		}
