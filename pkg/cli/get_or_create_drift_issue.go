@@ -24,7 +24,9 @@ func (runner *Runner) newGetOrCreateDriftIssueCommand() *cli.Command {
 
 func (runner *Runner) getOrCreateDriftIssueAction(c *cli.Context) error {
 	gh, err := github.New(c.Context, &github.ParamNew{
-		Token: os.Getenv("GITHUB_TOKEN"),
+		Token:              os.Getenv("GITHUB_TOKEN"),
+		GHEBaseURL:         os.Getenv("GITHUB_API_URL"),
+		GHEGraphQLEndpoint: os.Getenv("GITHUB_GRAPHQL_URL"),
 	})
 	if err != nil {
 		return fmt.Errorf("set up a GitHub Client: %w", err)
