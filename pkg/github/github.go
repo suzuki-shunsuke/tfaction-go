@@ -36,16 +36,15 @@ func New(ctx context.Context, param *ParamNew) (*ClientImpl, error) {
 	httpClient := getHTTPClientForGitHub(ctx, param.Token)
 	client := &ClientImpl{}
 
-	if param.GHEBaseURL == "" {
-		gh := github.NewClient(httpClient)
-		client.issue = gh.Issues
-	} else {
-		gh, err := github.NewClient(httpClient).WithEnterpriseURLs(param.GHEBaseURL, param.GHEBaseURL)
+	gh := github.NewClient(httpClient)
+	if param.GHEBaseURL != "" {
+		g, err := gh.WithEnterpriseURLs(param.GHEBaseURL, param.GHEBaseURL)
 		if err != nil {
 			return nil, fmt.Errorf("initialize GitHub Enterprise API Client: %w", err)
 		}
-		client.issue = gh.Issues
+		gh = g
 	}
+	client.issue = gh.Issues
 
 	if param.GHEGraphQLEndpoint == "" {
 		client.v4Client = githubv4.NewClient(httpClient)
