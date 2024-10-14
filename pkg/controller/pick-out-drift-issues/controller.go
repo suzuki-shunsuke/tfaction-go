@@ -36,8 +36,8 @@ type Param struct {
 	Now       time.Time
 }
 
-func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:funlen,cyclop
-	cfg, err := config.Read(ctrl.fs)
+func (c *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:funlen,cyclop
+	cfg, err := config.Read(c.fs)
 	if err != nil {
 		return fmt.Errorf("read tfaction-root.yaml: %w", err)
 	}
@@ -56,7 +56,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		repoName = cfg.DriftDetection.IssueRepoName
 	}
 
-	workingDirectories, err := createdriftissues.ListWorkingDirectories(ctrl.fs, cfg, param.PWD)
+	workingDirectories, err := createdriftissues.ListWorkingDirectories(c.fs, cfg, param.PWD)
 	if err != nil {
 		return fmt.Errorf("list working directories: %w", err)
 	}
@@ -98,7 +98,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		"deadline":                   deadline,
 	}).Info("check a deadline")
 
-	issues, err := ctrl.gh.ListLeastRecentlyUpdatedIssues(ctx, repoOwner, repoName, cfg.DriftDetection.NumOfIssues, deadline)
+	issues, err := c.gh.ListLeastRecentlyUpdatedIssues(ctx, repoOwner, repoName, cfg.DriftDetection.NumOfIssues, deadline)
 	if err != nil {
 		return fmt.Errorf("list drift issues: %w", err)
 	}
@@ -115,28 +115,28 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 			"issue_number": issue.Number,
 			"target":       issue.Target,
 		})
-		if _, err := ctrl.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, "Archived "+issue.Title); err != nil {
+		if _, err := c.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, "Archived "+issue.Title); err != nil {
 			logE.WithError(err).Error("archive an issue")
 		}
 		logE.Info("archive an issue")
 	}
 
-	return ctrl.setOutput(arr)
+	return c.setOutput(arr)
 }
 
-func (ctrl *Controller) setOutput(issues []*github.Issue) error {
+func (c *Controller) setOutput(issues []*github.Issue) error {
 	if len(issues) == 0 {
-		ctrl.action.SetOutput("has_issues", "false")
-		ctrl.action.SetOutput("issues", "[]")
+		c.action.SetOutput("has_issues", "false")
+		c.action.SetOutput("issues", "[]")
 		return nil
 	}
 
-	ctrl.action.SetOutput("has_issues", "true")
+	c.action.SetOutput("has_issues", "true")
 	b, err := json.Marshal(issues)
 	if err != nil {
 		return fmt.Errorf("marshal issues as JSON: %w", err)
 	}
-	ctrl.action.SetOutput("issues", string(b))
+	c.action.SetOutput("issues", string(b))
 	return nil
 }
 
