@@ -8,27 +8,12 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/logrus-error/logerr"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/config"
 	createdriftissues "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/create-drift-issues"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/util"
 )
-
-type Controller struct {
-	gh     github.Client
-	fs     afero.Fs
-	action Action
-}
-
-func New(gh github.Client, fs afero.Fs, action Action) *Controller {
-	return &Controller{
-		gh:     gh,
-		fs:     fs,
-		action: action,
-	}
-}
 
 type Param struct {
 	RepoOwner       string
@@ -37,9 +22,9 @@ type Param struct {
 	GitHubServerURL string
 }
 
-func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:cyclop
+func (c *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:cyclop
 	// Get or create a drift issue
-	cfg, err := config.Read(ctrl.fs)
+	cfg, err := config.Read(c.fs)
 	if err != nil {
 		return fmt.Errorf("read tfaction-root.yaml: %w", err)
 	}
@@ -64,7 +49,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		targetGroup = t
 		wd := strings.Replace(param.Target, targetGroup.Target, targetGroup.WorkingDirectory, 1)
 		p := filepath.Join(wd, cfg.WorkingDirectoryFile)
-		w, err := config.ReadWorkingDirectory(ctrl.fs, p)
+		w, err := config.ReadWorkingDirectory(c.fs, p)
 		if err != nil {
 			return fmt.Errorf("read %s: %w", p, err)
 		}
@@ -81,20 +66,20 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 	}
 
 	// Find a drift issue from target
-	issue, err := ctrl.gh.GetIssue(ctx, repoOwner, repoName, fmt.Sprintf(`Terraform Drift (%s)`, param.Target))
+	issue, err := c.gh.GetIssue(ctx, repoOwner, repoName, fmt.Sprintf(`Terraform Drift (%s)`, param.Target))
 	if err != nil {
 		return fmt.Errorf("get a drift issue: %w", err)
 	}
 	if issue == nil {
-		return ctrl.createIssue(ctx, logE, repoOwner, repoName, param)
+		return c.createIssue(ctx, logE, repoOwner, repoName, param)
 	}
 
-	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.Number))
-	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_STATE", issue.State)
+	c.action.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.Number))
+	c.action.SetEnv("TFACTION_DRIFT_ISSUE_STATE", issue.State)
 
 	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.Number)
-	ctrl.action.Infof(issueURL)
-	ctrl.action.AddStepSummary("Drift Issue: " + issueURL)
+	c.action.Infof(issueURL)
+	c.action.AddStepSummary("Drift Issue: " + issueURL)
 
 	return nil
 }
@@ -107,9 +92,9 @@ type Action interface {
 	SetOutput(k, v string)
 }
 
-func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, repoOwner, repoName string, param *Param) error {
+func (c *Controller) createIssue(ctx context.Context, logE *logrus.Entry, repoOwner, repoName string, param *Param) error {
 	// Create a drift issue
-	issue, err := ctrl.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
+	issue, err := c.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
 		Title: util.StrP(fmt.Sprintf(`Terraform Drift (%s)`, param.Target)),
 		Body:  util.StrP(createdriftissues.IssueBodyTemplate),
 	})
@@ -118,12 +103,12 @@ func (ctrl *Controller) createIssue(ctx context.Context, logE *logrus.Entry, rep
 	}
 	logE.Info("created an issue")
 
-	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.GetNumber()))
-	ctrl.action.SetEnv("TFACTION_DRIFT_ISSUE_STATE", "open")
+	c.action.SetEnv("TFACTION_DRIFT_ISSUE_NUMBER", strconv.Itoa(issue.GetNumber()))
+	c.action.SetEnv("TFACTION_DRIFT_ISSUE_STATE", "open")
 
 	issueURL := fmt.Sprintf("%s/%s/%s/pull/%v", param.GitHubServerURL, repoOwner, repoName, issue.GetNumber())
-	ctrl.action.Infof(issueURL)
-	ctrl.action.AddStepSummary("Drift Issue: " + issueURL)
+	c.action.Infof(issueURL)
+	c.action.AddStepSummary("Drift Issue: " + issueURL)
 
 	return nil
 }

@@ -27,8 +27,8 @@ func New(gh github.Client, fs afero.Fs) *Controller {
 	}
 }
 
-func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:cyclop,funlen
-	cfg, err := config.Read(ctrl.fs)
+func (c *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) error { //nolint:cyclop,funlen
+	cfg, err := config.Read(c.fs)
 	if err != nil {
 		return fmt.Errorf("read tfaction-root.yaml: %w", err)
 	}
@@ -48,7 +48,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		}
 	}
 
-	workingDirectories, err := ListWorkingDirectories(ctrl.fs, cfg, param.PWD)
+	workingDirectories, err := ListWorkingDirectories(c.fs, cfg, param.PWD)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 	logE.WithField("num_of_targets", len(targets)).Debug("convert working directories to targets")
 
 	// Search GitHub Issues
-	issues, err := ctrl.gh.ListIssues(ctx, repoOwner, repoName)
+	issues, err := c.gh.ListIssues(ctx, repoOwner, repoName)
 	if err != nil {
 		return fmt.Errorf("list issues: %w", err)
 	}
@@ -77,7 +77,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 		if _, ok := issueTargets[target]; ok {
 			continue
 		}
-		issue, err := ctrl.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
+		issue, err := c.gh.CreateIssue(ctx, repoOwner, repoName, &github.IssueRequest{
 			Title: util.StrP(fmt.Sprintf(`Terraform Drift (%s)`, target)),
 			Body:  util.StrP(IssueBodyTemplate),
 		})
@@ -85,7 +85,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 			logerr.WithError(logE, err).Error("create an issue")
 		}
 		logE.Info("created an issue")
-		if _, err := ctrl.gh.CloseIssue(ctx, repoOwner, repoName, issue.GetNumber()); err != nil {
+		if _, err := c.gh.CloseIssue(ctx, repoOwner, repoName, issue.GetNumber()); err != nil {
 			logerr.WithError(logE, err).Error("close an issue")
 		}
 		logE.Debug("closed an issue")
@@ -104,7 +104,7 @@ func (ctrl *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Para
 			"target":       target,
 			"issue_number": issue.Number,
 		})
-		if _, err := ctrl.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, "Archived "+issue.Title); err != nil {
+		if _, err := c.gh.ArchiveIssue(ctx, repoOwner, repoName, issue.Number, "Archived "+issue.Title); err != nil {
 			logE.WithError(err).Error("archive an issue")
 		}
 		logE.Info("archive an issue")
