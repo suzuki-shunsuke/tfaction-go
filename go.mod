@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/google/go-cmp v0.6.0
-	github.com/google/go-github/v69 v69.1.0
+	github.com/google/go-github/v69 v69.2.0
 	github.com/mattn/go-colorable v0.1.14
 	github.com/sethvargo/go-githubactions v1.3.0
 	github.com/shurcooL/githubv4 v0.0.0-20240429030203-be2daab69064
