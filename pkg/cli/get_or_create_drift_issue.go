@@ -11,7 +11,7 @@ import (
 	issue "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/get-or-create-drift-issue"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func (runner *Runner) newGetOrCreateDriftIssueCommand() *cli.Command {

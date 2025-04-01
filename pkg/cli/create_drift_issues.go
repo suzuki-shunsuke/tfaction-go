@@ -10,7 +10,7 @@ import (
 	issues "github.com/suzuki-shunsuke/tfaction-go/pkg/controller/create-drift-issues"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func (runner *Runner) newCreateDriftIssuesCommand() *cli.Command {
