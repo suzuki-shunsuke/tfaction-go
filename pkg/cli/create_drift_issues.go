@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -21,8 +22,8 @@ func (runner *Runner) newCreateDriftIssuesCommand() *cli.Command {
 	}
 }
 
-func (runner *Runner) createDriftIssuesAction(c *cli.Context) error {
-	gh, err := github.New(c.Context, &github.ParamNew{
+func (runner *Runner) createDriftIssuesAction(ctx context.Context, cmd *cli.Command) error {
+	gh, err := github.New(ctx, &github.ParamNew{
 		Token:              os.Getenv("GITHUB_TOKEN"),
 		GHEBaseURL:         os.Getenv("GITHUB_API_URL"),
 		GHEGraphQLEndpoint: os.Getenv("GITHUB_GRAPHQL_URL"),
@@ -32,7 +33,7 @@ func (runner *Runner) createDriftIssuesAction(c *cli.Context) error {
 	}
 	fs := afero.NewOsFs()
 	ctrl := issues.New(gh, fs)
-	log.SetLevel(c.String("log-level"), runner.LogE)
+	log.SetLevel(cmd.String("log-level"), runner.LogE)
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	repoOwner, repoName, found := strings.Cut(repo, "/")
 	if !found {
@@ -42,7 +43,7 @@ func (runner *Runner) createDriftIssuesAction(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("get a current directory path: %w", err)
 	}
-	return ctrl.Run(c.Context, runner.LogE, &issues.Param{ //nolint:wrapcheck
+	return ctrl.Run(ctx, runner.LogE, &issues.Param{ //nolint:wrapcheck
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
 		PWD:       pwd,

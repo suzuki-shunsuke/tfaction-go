@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -22,8 +23,8 @@ func (runner *Runner) newGetOrCreateDriftIssueCommand() *cli.Command {
 	}
 }
 
-func (runner *Runner) getOrCreateDriftIssueAction(c *cli.Context) error {
-	gh, err := github.New(c.Context, &github.ParamNew{
+func (runner *Runner) getOrCreateDriftIssueAction(ctx context.Context, cmd *cli.Command) error {
+	gh, err := github.New(ctx, &github.ParamNew{
 		Token:              os.Getenv("GITHUB_TOKEN"),
 		GHEBaseURL:         os.Getenv("GITHUB_API_URL"),
 		GHEGraphQLEndpoint: os.Getenv("GITHUB_GRAPHQL_URL"),
@@ -33,7 +34,7 @@ func (runner *Runner) getOrCreateDriftIssueAction(c *cli.Context) error {
 	}
 	fs := afero.NewOsFs()
 	ctrl := issue.New(gh, fs, githubactions.New())
-	log.SetLevel(c.String("log-level"), runner.LogE)
+	log.SetLevel(cmd.String("log-level"), runner.LogE)
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	repoOwner, repoName, found := strings.Cut(repo, "/")
 	if !found {
@@ -43,7 +44,7 @@ func (runner *Runner) getOrCreateDriftIssueAction(c *cli.Context) error {
 	if target == "" {
 		return errors.New("TFACTION_TARGET is not set")
 	}
-	return ctrl.Run(c.Context, runner.LogE, &issue.Param{ //nolint:wrapcheck
+	return ctrl.Run(ctx, runner.LogE, &issue.Param{ //nolint:wrapcheck
 		RepoOwner:       repoOwner,
 		RepoName:        repoName,
 		Target:          target,

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -23,8 +24,8 @@ func (runner *Runner) newPickOutDriftIssuesCommand() *cli.Command {
 	}
 }
 
-func (runner *Runner) pickOutDriftIssuesAction(c *cli.Context) error {
-	gh, err := github.New(c.Context, &github.ParamNew{
+func (runner *Runner) pickOutDriftIssuesAction(ctx context.Context, c *cli.Command) error {
+	gh, err := github.New(ctx, &github.ParamNew{
 		Token:              os.Getenv("GITHUB_TOKEN"),
 		GHEBaseURL:         os.Getenv("GITHUB_API_URL"),
 		GHEGraphQLEndpoint: os.Getenv("GITHUB_GRAPHQL_URL"),
@@ -44,7 +45,7 @@ func (runner *Runner) pickOutDriftIssuesAction(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("get a current directory path: %w", err)
 	}
-	return ctrl.Run(c.Context, runner.LogE, &issues.Param{ //nolint:wrapcheck
+	return ctrl.Run(ctx, runner.LogE, &issues.Param{ //nolint:wrapcheck
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
 		PWD:       pwd,
