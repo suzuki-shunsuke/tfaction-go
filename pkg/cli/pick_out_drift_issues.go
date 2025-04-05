@@ -16,15 +16,15 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func (runner *Runner) newPickOutDriftIssuesCommand() *cli.Command {
+func (r *Runner) newPickOutDriftIssuesCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "pick-out-drift-issues",
 		Usage:  "Pick out GitHub Issues for Terraform drift detection",
-		Action: runner.pickOutDriftIssuesAction,
+		Action: r.pickOutDriftIssuesAction,
 	}
 }
 
-func (runner *Runner) pickOutDriftIssuesAction(ctx context.Context, c *cli.Command) error {
+func (r *Runner) pickOutDriftIssuesAction(ctx context.Context, c *cli.Command) error {
 	gh, err := github.New(ctx, &github.ParamNew{
 		Token:              os.Getenv("GITHUB_TOKEN"),
 		GHEBaseURL:         os.Getenv("GITHUB_API_URL"),
@@ -35,7 +35,7 @@ func (runner *Runner) pickOutDriftIssuesAction(ctx context.Context, c *cli.Comma
 	}
 	fs := afero.NewOsFs()
 	ctrl := issues.New(gh, fs, githubactions.New())
-	log.SetLevel(c.String("log-level"), runner.LogE)
+	log.SetLevel(c.String("log-level"), r.LogE)
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	repoOwner, repoName, found := strings.Cut(repo, "/")
 	if !found {
@@ -45,7 +45,7 @@ func (runner *Runner) pickOutDriftIssuesAction(ctx context.Context, c *cli.Comma
 	if err != nil {
 		return fmt.Errorf("get a current directory path: %w", err)
 	}
-	return ctrl.Run(ctx, runner.LogE, &issues.Param{ //nolint:wrapcheck
+	return ctrl.Run(ctx, r.LogE, &issues.Param{ //nolint:wrapcheck
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
 		PWD:       pwd,

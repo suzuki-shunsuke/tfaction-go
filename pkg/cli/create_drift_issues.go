@@ -14,15 +14,15 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func (runner *Runner) newCreateDriftIssuesCommand() *cli.Command {
+func (r *Runner) newCreateDriftIssuesCommand() *cli.Command {
 	return &cli.Command{
 		Name:   "create-drift-issues",
 		Usage:  "Create GitHub Issues for Terraform drift detection",
-		Action: runner.createDriftIssuesAction,
+		Action: r.createDriftIssuesAction,
 	}
 }
 
-func (runner *Runner) createDriftIssuesAction(ctx context.Context, cmd *cli.Command) error {
+func (r *Runner) createDriftIssuesAction(ctx context.Context, cmd *cli.Command) error {
 	gh, err := github.New(ctx, &github.ParamNew{
 		Token:              os.Getenv("GITHUB_TOKEN"),
 		GHEBaseURL:         os.Getenv("GITHUB_API_URL"),
@@ -33,7 +33,7 @@ func (runner *Runner) createDriftIssuesAction(ctx context.Context, cmd *cli.Comm
 	}
 	fs := afero.NewOsFs()
 	ctrl := issues.New(gh, fs)
-	log.SetLevel(cmd.String("log-level"), runner.LogE)
+	log.SetLevel(cmd.String("log-level"), r.LogE)
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	repoOwner, repoName, found := strings.Cut(repo, "/")
 	if !found {
@@ -43,7 +43,7 @@ func (runner *Runner) createDriftIssuesAction(ctx context.Context, cmd *cli.Comm
 	if err != nil {
 		return fmt.Errorf("get a current directory path: %w", err)
 	}
-	return ctrl.Run(ctx, runner.LogE, &issues.Param{ //nolint:wrapcheck
+	return ctrl.Run(ctx, r.LogE, &issues.Param{ //nolint:wrapcheck
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
 		PWD:       pwd,
