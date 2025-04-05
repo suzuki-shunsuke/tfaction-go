@@ -88,11 +88,11 @@ target_groups:
 			},
 		},
 	}
-	ctx := context.Background()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
+			ctx := t.Context()
 
 			gh := github.NewMockClient(t)
 			d.setGH(ctx, gh)

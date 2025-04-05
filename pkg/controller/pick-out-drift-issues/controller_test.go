@@ -71,14 +71,13 @@ target_groups:
 			},
 		},
 	}
-	ctx := context.Background()
 	logE := logrus.NewEntry(logrus.New())
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
 
 			gh := github.NewMockClient(t)
-			d.setGH(ctx, gh)
+			d.setGH(t.Context(), gh)
 
 			fs := afero.NewMemMapFs()
 			for k, v := range d.files {
@@ -94,7 +93,7 @@ target_groups:
 			d.setAction(action)
 
 			ctrl := issues.New(gh, fs, action)
-			if err := ctrl.Run(ctx, logE, d.param); err != nil {
+			if err := ctrl.Run(t.Context(), logE, d.param); err != nil {
 				if d.isErr {
 					return
 				}
