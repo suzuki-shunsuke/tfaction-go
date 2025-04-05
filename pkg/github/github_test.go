@@ -1,7 +1,6 @@
 package github_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/github"
@@ -24,8 +23,7 @@ func TestNew(t *testing.T) {
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			t.Parallel()
-			ctx := context.Background()
-			cl, err := github.New(ctx, d.param)
+			cl, err := github.New(t.Context(), d.param)
 			if err != nil {
 				if d.isErr {
 					return

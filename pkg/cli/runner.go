@@ -5,6 +5,8 @@ import (
 	"io"
 
 	"github.com/sirupsen/logrus"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/helpall"
+	"github.com/suzuki-shunsuke/urfave-cli-v3-util/vcmd"
 	"github.com/urfave/cli/v3"
 )
 
@@ -22,11 +24,11 @@ type LDFlags struct {
 	Date    string
 }
 
-func (runner *Runner) Run(ctx context.Context, args ...string) error {
-	app := cli.Command{
+func (r *Runner) Run(ctx context.Context, args ...string) error {
+	return helpall.With(&cli.Command{ //nolint:wrapcheck
 		Name:    "tfaction",
 		Usage:   "GitHub Actions Workflow for Terraform. https://github/com/suzuki-shunsuke/tfaction-go",
-		Version: runner.LDFlags.Version + " (" + runner.LDFlags.Commit + ")",
+		Version: r.LDFlags.Version + " (" + r.LDFlags.Commit + ")",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "log-level",
@@ -36,12 +38,14 @@ func (runner *Runner) Run(ctx context.Context, args ...string) error {
 		},
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
-			runner.newVersionCommand(),
-			runner.newCreateDriftIssuesCommand(),
-			runner.newPickOutDriftIssuesCommand(),
-			runner.newGetOrCreateDriftIssueCommand(),
+			r.newCreateDriftIssuesCommand(),
+			r.newPickOutDriftIssuesCommand(),
+			r.newGetOrCreateDriftIssueCommand(),
+			vcmd.New(&vcmd.Command{
+				Name:    "tfaction",
+				Version: r.LDFlags.Version,
+				SHA:     r.LDFlags.Commit,
+			}),
 		},
-	}
-
-	return app.Run(ctx, args) //nolint:wrapcheck
+	}, nil).Run(ctx, args)
 }
