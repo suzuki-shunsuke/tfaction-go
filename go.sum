@@ -34,8 +34,8 @@ github.com/suzuki-shunsuke/logrus-error v0.1.4 h1:nWo98uba1fANHdZ9Y5pJ2RKs/PpVjr
 github.com/suzuki-shunsuke/logrus-error v0.1.4/go.mod h1:WsVvvw6SKSt08/fB2qbnsKIMJA4K1MYCUprqsBJbMiM=
 github.com/suzuki-shunsuke/urfave-cli-v3-util v0.0.2 h1:sgCdlcfyY/EE7K6bbL5fw1nhxnOv3ETEAQRJsBp1hq8=
 github.com/suzuki-shunsuke/urfave-cli-v3-util v0.0.2/go.mod h1:hnKvR1IZskaS3isZPuO1Ndw9++o+W66pL2kzBAGsglE=
-github.com/urfave/cli/v3 v3.3.0 h1:TYGQcoZJ2jWhLdfnxOzN171GYK4Intqmhb2cHr7Vu8I=
-github.com/urfave/cli/v3 v3.3.0/go.mod h1:FJSKtM/9AiiTOJL4fJ6TbMUkxBXn7GO9guZqoZtpYpo=
+github.com/urfave/cli/v3 v3.3.1 h1:1W2P2ymTKcAbRjpmfczJdZWP2evOPbLGGr60KuTiRxE=
+github.com/urfave/cli/v3 v3.3.1/go.mod h1:FJSKtM/9AiiTOJL4fJ6TbMUkxBXn7GO9guZqoZtpYpo=
 golang.org/x/net v0.37.0 h1:1zLorHbz+LYj7MQlSf1+2tPIIgibq2eL5xkrGk6f+2c=
 golang.org/x/net v0.37.0/go.mod h1:ivrbrMbzFq5J41QOQh0siUuly180yBYtLp+CKbEaFx8=
 golang.org/x/oauth2 v0.29.0 h1:WdYw2tdTK1S8olAzWHdgeqfy+Mtm9XNhv/xJsY65d98=
