@@ -1,4 +1,4 @@
-package util
+package util //nolint:revive
 
 func StrP(s string) *string {
 	return &s
