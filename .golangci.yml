@@ -17,6 +17,9 @@ linters:
     - tagliatelle
     - varnamelen
     - wsl
+    - wsl_v5
+    - noinlineerr
+    # - revive: 1
   exclusions:
     generated: lax
     presets:

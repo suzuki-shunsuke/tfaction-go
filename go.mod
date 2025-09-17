@@ -1,6 +1,6 @@
 module github.com/suzuki-shunsuke/tfaction-go
 
-go 1.24.2
+go 1.25.0
 
 require (
 	github.com/google/go-cmp v0.7.0
@@ -12,7 +12,7 @@ require (
 	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.11.1
 	github.com/suzuki-shunsuke/logrus-error v0.1.4
-	github.com/suzuki-shunsuke/urfave-cli-v3-util v0.0.7
+	github.com/suzuki-shunsuke/urfave-cli-v3-util v0.1.0
 	github.com/urfave/cli/v3 v3.4.1
 	golang.org/x/oauth2 v0.31.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -26,6 +26,6 @@ require (
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	golang.org/x/net v0.37.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 )
