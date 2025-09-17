@@ -3,6 +3,11 @@ version: 2
 project_name: tfaction
 archives:
   - name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
+    files:
+      - LICENSE
+      - README.md
+      - third_party_licenses/**/*
+
 builds:
   - binary: tfaction
     main: cmd/tfaction/main.go
@@ -19,19 +24,3 @@ release:
   prerelease: true
   header: |
     [Pull Requests](https://github.com/suzuki-shunsuke/tfaction-go/pulls?q=is%3Apr+milestone%3A{{.Tag}}) | [Issues](https://github.com/suzuki-shunsuke/tfaction-go/issues?q=is%3Aissue+milestone%3A{{.Tag}}) | https://github.com/suzuki-shunsuke/tfaction-go/compare/{{.PreviousTag}}...{{.Tag}}
-signs:
-  - cmd: cosign
-    artifacts: checksum
-    signature: ${artifact}.sig
-    certificate: ${artifact}.pem
-    output: true
-    args:
-      - sign-blob
-      - "-y"
-      - --output-signature
-      - ${signature}
-      - --output-certificate
-      - ${certificate}
-      - --oidc-provider
-      - github
-      - ${artifact}
