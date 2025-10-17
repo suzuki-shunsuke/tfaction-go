@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/google/go-github/v74/github"
+	"github.com/google/go-github/v76/github"
 	"github.com/shurcooL/githubv4"
 	"github.com/suzuki-shunsuke/tfaction-go/pkg/util"
 	"golang.org/x/oauth2"
