@@ -8,7 +8,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14
 	github.com/sethvargo/go-githubactions v1.3.2
 	github.com/shurcooL/githubv4 v0.0.0-20240429030203-be2daab69064
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/afero v1.15.0
 	github.com/stretchr/testify v1.11.1
 	github.com/suzuki-shunsuke/logrus-error v0.1.4
