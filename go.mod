@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/google/go-cmp v0.7.0
-	github.com/google/go-github/v80 v80.0.0
+	github.com/google/go-github/v81 v81.0.0
 	github.com/mattn/go-colorable v0.1.14
 	github.com/sethvargo/go-githubactions v1.3.2
 	github.com/shurcooL/githubv4 v0.0.0-20240429030203-be2daab69064
