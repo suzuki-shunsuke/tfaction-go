@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/google/go-cmp v0.7.0
-	github.com/google/go-github/v80 v80.0.0
+	github.com/google/go-github/v82 v82.0.0
 	github.com/mattn/go-colorable v0.1.14
 	github.com/sethvargo/go-githubactions v1.3.2
 	github.com/shurcooL/githubv4 v0.0.0-20240429030203-be2daab69064
@@ -20,7 +20,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29 // indirect
