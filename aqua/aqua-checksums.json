@@ -131,28 +131,28 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v2.6.2/cosign-darwin-amd64",
-      "checksum": "AD5DB28C48FAF66984C48733CAD66504CEA316F8E833BB13EF13060A6DC45B13",
+      "id": "github_release/github.com/sigstore/cosign/v2.6.3/cosign-darwin-amd64",
+      "checksum": "5715D61DD00A9B6DCB344DE14910B434145855B7F82690B94183C553AC1B68BE",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v2.6.2/cosign-darwin-arm64",
-      "checksum": "C01DF01BAC51714322F17D6416798D8A7B9E903657C6A2F8F09B9AEE5BA29F57",
+      "id": "github_release/github.com/sigstore/cosign/v2.6.3/cosign-darwin-arm64",
+      "checksum": "FF497A698F125F3130B04F000B2CB0DD163BCAF00B5E776EF536035E6D0B3F3E",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v2.6.2/cosign-linux-amd64",
-      "checksum": "D437B8F0D30F5DEC169337607FCFA0238DE1348503E175F1BB5B94330B1EE409",
+      "id": "github_release/github.com/sigstore/cosign/v2.6.3/cosign-linux-amd64",
+      "checksum": "7C78A7F2EFC00088BD788A758DB6E0928E79F3E0EB83EB5D3C499ED98DA4C4F4",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v2.6.2/cosign-linux-arm64",
-      "checksum": "3DEE37FCE75FCF51B00B985DBC64DF15C30CF35D9CA9C5CDBF3E8E867A22E43F",
+      "id": "github_release/github.com/sigstore/cosign/v2.6.3/cosign-linux-arm64",
+      "checksum": "B7C23659A50A59FD8EEC44B87188E9062157D0C87796CAC7B38727E5390C4917",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/sigstore/cosign/v2.6.2/cosign-windows-amd64.exe",
-      "checksum": "DD6C61E510DA627BCAED4CD9DB844EC11CACD09826D814D89F7F68D40FEB07BE",
+      "id": "github_release/github.com/sigstore/cosign/v2.6.3/cosign-windows-amd64.exe",
+      "checksum": "2264EA5867077B9E070161648E8C18544DECAC351F5F3A7EDAEA43C233CE2E36",
       "algorithm": "sha256"
     },
     {
