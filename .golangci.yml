@@ -35,6 +35,10 @@ linters:
       - path: pkg/util/
         linters:
           - revive
+      - path: _test\.go
+        linters:
+          - goconst
+          - gosec
 formatters:
   enable:
     - gci
