@@ -87,7 +87,7 @@ func (c *Controller) Run(ctx context.Context, logE *logrus.Entry, param *Param) 
 //go:generate mockery --name Action --testonly=false
 type Action interface {
 	AddStepSummary(markdown string)
-	Infof(msg string, args ...interface{})
+	Infof(msg string, args ...any)
 	SetEnv(k, v string)
 	SetOutput(k, v string)
 }

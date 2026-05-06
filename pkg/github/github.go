@@ -55,8 +55,14 @@ func New(ctx context.Context, param *ParamNew) (*ClientImpl, error) {
 	return client, nil
 }
 
+const (
+	keySearchQuery  = "searchQuery"
+	keySearchType   = "searchType"
+	keyIssuesCursor = "issuesCursor"
+)
+
 type v4Client interface {
-	Query(ctx context.Context, q interface{}, variables map[string]interface{}) error
+	Query(ctx context.Context, q any, variables map[string]any) error
 }
 
 func getHTTPClientForGitHub(ctx context.Context, token string) *http.Client {
@@ -108,10 +114,10 @@ func (cl *ClientImpl) ListIssues(ctx context.Context, repoOwner, repoName string
 			}
 		} `graphql:"search(first: 100, after: $issuesCursor, query: $searchQuery, type: $searchType)"`
 	}
-	variables := map[string]interface{}{
-		"searchQuery":  githubv4.String(fmt.Sprintf(`repo:%s/%s "Terraform Drift" in:title`, repoOwner, repoName)),
-		"searchType":   githubv4.SearchTypeIssue,
-		"issuesCursor": (*githubv4.String)(nil), // Null after argument to get first page.
+	variables := map[string]any{
+		keySearchQuery:  githubv4.String(fmt.Sprintf(`repo:%s/%s "Terraform Drift" in:title`, repoOwner, repoName)),
+		keySearchType:   githubv4.SearchTypeIssue,
+		keyIssuesCursor: (*githubv4.String)(nil), // Null after argument to get first page.
 	}
 
 	var allIssues []*Issue
@@ -134,7 +140,7 @@ func (cl *ClientImpl) ListIssues(ctx context.Context, repoOwner, repoName string
 		if !q.Search.PageInfo.HasNextPage {
 			break
 		}
-		variables["issuesCursor"] = githubv4.NewString(q.Search.PageInfo.EndCursor)
+		variables[keyIssuesCursor] = githubv4.NewString(q.Search.PageInfo.EndCursor)
 	}
 	return allIssues, nil
 }
@@ -184,10 +190,10 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 			}
 		} `graphql:"search(first: 100, after: $issuesCursor, query: $searchQuery, type: $searchType)"`
 	}
-	variables := map[string]interface{}{
-		"searchQuery":  githubv4.String(fmt.Sprintf(`repo:%s/%s "Terraform Drift" in:title sort:updated-asc updated:<%s`, repoOwner, repoName, deadline)),
-		"searchType":   githubv4.SearchTypeIssue,
-		"issuesCursor": (*githubv4.String)(nil), // Null after argument to get first page.
+	variables := map[string]any{
+		keySearchQuery:  githubv4.String(fmt.Sprintf(`repo:%s/%s "Terraform Drift" in:title sort:updated-asc updated:<%s`, repoOwner, repoName, deadline)),
+		keySearchType:   githubv4.SearchTypeIssue,
+		keyIssuesCursor: (*githubv4.String)(nil), // Null after argument to get first page.
 	}
 
 	var allIssues []*Issue
@@ -214,7 +220,7 @@ func (cl *ClientImpl) ListLeastRecentlyUpdatedIssues(ctx context.Context, repoOw
 		if !q.Search.PageInfo.HasNextPage {
 			return allIssues, nil
 		}
-		variables["issuesCursor"] = githubv4.NewString(q.Search.PageInfo.EndCursor)
+		variables[keyIssuesCursor] = githubv4.NewString(q.Search.PageInfo.EndCursor)
 	}
 }
 
@@ -234,10 +240,10 @@ func (cl *ClientImpl) GetIssue(ctx context.Context, repoOwner, repoName, title s
 			}
 		} `graphql:"search(first: 100, after: $issuesCursor, query: $searchQuery, type: $searchType)"`
 	}
-	variables := map[string]interface{}{
-		"searchQuery":  githubv4.String(fmt.Sprintf(`repo:%s/%s "%s" in:title`, repoOwner, repoName, title)),
-		"searchType":   githubv4.SearchTypeIssue,
-		"issuesCursor": (*githubv4.String)(nil), // Null after argument to get first page.
+	variables := map[string]any{
+		keySearchQuery:  githubv4.String(fmt.Sprintf(`repo:%s/%s "%s" in:title`, repoOwner, repoName, title)),
+		keySearchType:   githubv4.SearchTypeIssue,
+		keyIssuesCursor: (*githubv4.String)(nil), // Null after argument to get first page.
 	}
 
 	for {
@@ -256,7 +262,7 @@ func (cl *ClientImpl) GetIssue(ctx context.Context, repoOwner, repoName, title s
 		if !q.Search.PageInfo.HasNextPage {
 			break
 		}
-		variables["issuesCursor"] = githubv4.NewString(q.Search.PageInfo.EndCursor)
+		variables[keyIssuesCursor] = githubv4.NewString(q.Search.PageInfo.EndCursor)
 	}
 	return nil, nil //nolint:nilnil
 }
