@@ -36,13 +36,13 @@ func New(ctx context.Context, param *ParamNew) (*ClientImpl, error) {
 	httpClient := getHTTPClientForGitHub(ctx, param.Token)
 	client := &ClientImpl{}
 
-	gh := github.NewClient(httpClient)
+	opts := []github.ClientOptionsFunc{github.WithHTTPClient(httpClient)}
 	if param.GHEBaseURL != "" {
-		g, err := gh.WithEnterpriseURLs(param.GHEBaseURL, param.GHEBaseURL)
-		if err != nil {
-			return nil, fmt.Errorf("initialize GitHub Enterprise API Client: %w", err)
-		}
-		gh = g
+		opts = append(opts, github.WithEnterpriseURLs(param.GHEBaseURL, param.GHEBaseURL))
+	}
+	gh, err := github.NewClient(opts...)
+	if err != nil {
+		return nil, fmt.Errorf("initialize GitHub API Client: %w", err)
 	}
 	client.issue = gh.Issues
 
